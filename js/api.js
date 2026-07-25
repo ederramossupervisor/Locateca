@@ -1,5 +1,5 @@
 const API = (() => {
-  const BASE_URL = 'https://script.google.com/macros/s/AKfycbxeC5orW_66rJp8nwCSvIFZZBMVwq867BVuhby-i5LWHd3qYgT4ghAgrcArUrji7mdvjA/exec';
+  const BASE_URL = 'https://script.google.com/macros/s/AKfycby4wobYQrLLTWl_v-qXtzDltpbhOUjjXlU_W3nOJtJsk0wv1fLi8yUhcer1wDj_RB-o/exec';
 
   // Ações somente-leitura: seguras para reaproveitar respostas recentes em
   // memória. Qualquer ação fora desta lista é tratada como mutação e limpa
