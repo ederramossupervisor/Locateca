@@ -1,5 +1,5 @@
 /**
- * Utilitários gerais – Calixteca
+ * Utilitários gerais – Locateca
  */
 const Util = {
   qs: (sel) => document.querySelector(sel),

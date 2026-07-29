@@ -193,7 +193,7 @@ function initTema() {
         body.classList.toggle('dark-mode');
         Util.setPreference('darkMode', body.classList.contains('dark-mode'));
         atualizarTodos();
-        window.dispatchEvent(new CustomEvent('calixteca:tema-alterado', {
+        window.dispatchEvent(new CustomEvent('Locateca:tema-alterado', {
           detail: { escuro: body.classList.contains('dark-mode') }
         }));
       });

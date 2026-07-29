@@ -23,7 +23,7 @@ const FilaOffline = (() => {
         el.classList.add('d-none');
       }
     });
-    window.dispatchEvent(new CustomEvent('calixteca:fila-offline', { detail: { total } }));
+    window.dispatchEvent(new CustomEvent('Locateca:fila-offline', { detail: { total } }));
     return total;
   }
 

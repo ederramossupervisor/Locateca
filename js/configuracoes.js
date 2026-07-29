@@ -34,7 +34,7 @@ const Configuracoes = (() => {
               await DB.salvarConfigsCache(configsAtuais);
             }
           } catch (e) { /* cache é só uma otimização — sem problema se falhar */ }
-          window.dispatchEvent(new CustomEvent('calixteca:configs-atualizadas'));
+          window.dispatchEvent(new CustomEvent('Locateca:configs-atualizadas'));
         }
       } catch (e) {
         Util.toast('Erro ao salvar.', 'danger');
@@ -197,11 +197,11 @@ const Configuracoes = (() => {
     for (let i = 0; i < localStorage.length; i++) {
       const chave = localStorage.key(i);
       if (!chave) continue;
-      if (chave.startsWith('calixteca_highlights_')) {
+      if (chave.startsWith('Locateca_highlights_')) {
         try { dados.highlights[chave] = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
-      } else if (chave.startsWith('calixteca_pos_')) {
+      } else if (chave.startsWith('Locateca_pos_')) {
         try { dados.posicoes[chave] = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
-      } else if (chave === 'calixteca_leitor_config') {
+      } else if (chave === 'Locateca_leitor_config') {
         try { dados.leitorConfig = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
       }
     }
@@ -217,7 +217,7 @@ const Configuracoes = (() => {
         localStorage.setItem(chave, JSON.stringify(valor));
       });
       if (dadosLocais.leitorConfig) {
-        localStorage.setItem('calixteca_leitor_config', JSON.stringify(dadosLocais.leitorConfig));
+        localStorage.setItem('Locateca_leitor_config', JSON.stringify(dadosLocais.leitorConfig));
       }
     } catch (e) {
       console.warn('Falha ao restaurar grifos/posições/config do leitor:', e);

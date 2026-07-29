@@ -218,7 +218,7 @@ const Leitura = (() => {
     if (!('mediaSession' in navigator)) return;
     navigator.mediaSession.metadata = new MediaMetadata({
       title: livro?.Título || 'Leitura',
-      artist: livro?.Autor || 'Calixteca',
+      artist: livro?.Autor || 'Locateca',
       artwork: [
         { src: livro?.URLCapa || 'img/icons/logo.png', sizes: '96x96', type: 'image/png' }
       ]

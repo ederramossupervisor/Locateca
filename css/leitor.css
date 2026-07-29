@@ -194,7 +194,7 @@
 
 /* Marca visual do texto grifado dentro do EPUB (aplicada via
    rendition.annotations, mas garantimos um estilo de fallback) */
-.hl-calixteca {
+.hl-Locateca {
   mix-blend-mode: multiply;
 }
 
@@ -232,7 +232,7 @@
   pointer-events: none;
   z-index: 5;
 }
-.hl-calixteca-pdf {
+.hl-Locateca-pdf {
   position: absolute;
   mix-blend-mode: multiply;
   cursor: pointer;

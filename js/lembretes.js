@@ -41,7 +41,7 @@ const Lembretes = (() => {
       const dados = await API.enviar({ acao: 'dashboard' });
       const paginasHoje = dados && !dados.erro ? (dados.paginasHoje || 0) : null;
       if (paginasHoje === 0) {
-        new Notification('Calixteca', {
+        new Notification('Locateca', {
           body: 'Você ainda não leu hoje. Que tal alguns minutos agora, pra manter a sequência?',
           icon: 'img/icons/icon-192x192.png'
         });

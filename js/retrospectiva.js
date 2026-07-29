@@ -92,7 +92,7 @@ const Retrospectiva = (() => {
         <p class="retrospectiva-destaque">Velocidade média: <strong>${resumo.velocidadeMedia || 0} pág/h</strong></p>
         <div class="retrospectiva-marca">
           <img src="img/icons/icon-128x128.png" alt="Ícone" style="height: 2.2em; vertical-align: middle; margin-right: 0.3em;">
-          Calixteca
+          Locateca
         </div>
       </div>`;
 
