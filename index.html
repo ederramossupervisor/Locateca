@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1a73e8">
-  <meta name="description" content="Locateca - Seu diário de leitura inteligente">
+  <meta name="description" content="Calixteca - Seu diário de leitura inteligente">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="img/icons/icon-192x192.png">
 
-  <title>Locateca</title>
+  <title>Calixteca</title>
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -41,21 +41,17 @@
   <link rel="stylesheet" href="css/desejos.css">
   <link rel="stylesheet" href="css/exportar.css">
   <link rel="stylesheet" href="css/configuracoes.css">
+  <link rel="stylesheet" href="css/retrospectiva.css">
   <link rel="stylesheet" href="css/skeleton.css">
   <link rel="stylesheet" href="css/dark-mode.css">
   <link rel="preload" as="image" href="img/fundo-splash.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body class="light-mode">
-  <!-- Splash screen (aparece enquanto carrega) -->
-  <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-image: url('img/fundo-splash.png'); background-size: cover; background-position: center; z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s ease;">
-    <div class="splash-content" style="text-align: center; color: #fff;">
-      <img src="img/icons/logo.gif" alt="Locateca" class="splash-logo" style="width: 250px; height: auto; margin-bottom: 1.5rem; animation: splash-pulse 1.5s ease-in-out infinite;">
-      <div class="splash-loader" style="width: 150px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; margin: 0 auto;">
-        <div class="splash-loader-bar" style="width: 0%; height: 100%; background: #fff; border-radius: 2px; animation: splash-loading 2s ease-in-out forwards;"></div>
-      </div>
-    </div>
-  </div>
+ <!-- Splash screen (aparece enquanto carrega) -->
+<div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('img/fundo-splash.png'); background-size: cover; background-position: center; z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s ease;">
+  <!-- Conteúdo removido: apenas a imagem de fundo -->
+</div>
   <!-- Barra de navegação inferior (mobile-first) -->
   <nav class="bottom-nav d-md-none fixed-bottom bg-white shadow-lg">
     <div class="container d-flex justify-content-around py-1">
@@ -86,7 +82,7 @@
   <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="mobileMenuLabel" style="font-family: var(--font-display);">
-        <img src="img/icons/logo.png" alt="Locateca" width="32" height="32" class="me-2"> Locateca
+        <img src="img/icons/logo.png" alt="Calixteca" width="32" height="32" class="me-2"> Calixteca
       </h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
     </div>
@@ -112,9 +108,10 @@
       <i class="fas fa-bars"></i>
     </button>
     <span class="fw-bold d-flex align-items-center gap-2" style="font-family: var(--font-display);">
-      Locateca
+      Calixteca
       <span class="sync-status" data-sync-status="sincronizado" title="Sincronizado">
         <i class="sync-status-icon fas fa-check-circle text-success"></i>
+        <span class="badge bg-warning text-dark rounded-pill d-none" data-fila-offline-contador title="Sessões aguardando sincronizar" style="font-size:0.6rem;"></span>
       </span>
     </span>
     <div class="d-flex align-items-center gap-1">
@@ -130,7 +127,7 @@
   <!-- Sidebar (desktop) -->
   <aside class="sidebar d-none d-md-flex flex-column bg-white shadow-sm">
     <div class="sidebar-brand text-center" style="padding: 0;">
-      <img src="img/icons/sidebar.gif" alt="Locateca" style="width: 100%; height: auto; display: block;">
+      <img src="img/icons/sidebar.gif" alt="Calixteca" style="width: 100%; height: auto; display: block;">
     </div>
     <nav class="nav flex-column px-3">
       <a href="#" class="nav-link active" data-page="dashboard"><i class="fas fa-home me-2"></i> Início</a>
@@ -150,6 +147,7 @@
       <div class="sync-status-desktop small text-center mb-2" data-sync-status="sincronizado" title="Sincronizado">
         <i class="sync-status-icon fas fa-check-circle text-success"></i>
         <span class="sync-status-text ms-1">Sincronizado</span>
+        <span class="badge bg-warning text-dark rounded-pill ms-1 d-none" data-fila-offline-contador title="Sessões aguardando sincronizar"></span>
       </div>
       <button id="theme-toggle" class="btn btn-outline-secondary w-100">
         <i class="fas fa-moon"></i> <span class="ms-1">Modo escuro</span>
@@ -169,7 +167,7 @@
             <div class="card shadow-sm">
               <div class="card-body d-flex align-items-center" id="livro-atual-card">
                 <div class="me-3">
-                  <img src="img/icons/logo.png" alt="Locateca" width="48" height="48">
+                  <img src="img/icons/logo.png" alt="Calixteca" width="48" height="48">
                 </div>
                 <div>
                   <small class="text-muted">Leitura atual</small>
@@ -283,6 +281,14 @@
               <input type="text" id="biblioteca-search" class="form-control" placeholder="Pesquisar por título, autor ou tags...">
             </div>
           </div>
+        </div>
+
+        <!-- Filtro rápido por status (fica fixo no topo ao rolar) -->
+        <div class="biblioteca-filtros-status mb-3" id="biblioteca-filtros-status">
+          <button type="button" class="chip-filtro active" data-status="">Todos</button>
+          <button type="button" class="chip-filtro" data-status="Lendo">Lendo</button>
+          <button type="button" class="chip-filtro" data-status="Quero ler">Quero ler</button>
+          <button type="button" class="chip-filtro" data-status="Finalizado">Finalizado</button>
         </div>
 
         <!-- Contador -->
@@ -628,38 +634,34 @@
                 </div>
                 <div class="col-md-4">
                   <label for="humor" class="form-label">Humor</label>
-                  <select id="humor" class="form-select">
-                    <option value="">Selecione...</option>
-                    <option>😊 Feliz</option>
-                    <option>😐 Neutro</option>
-                    <option>😔 Triste</option>
-                    <option>😴 Cansado</option>
-                    <option>🤩 Empolgado</option>
-                    <option>😌 Relaxado</option>
-                    <option>🤔 Reflexivo</option>
-                    <option>😤 Irritado</option>
-                    <option>😢 Emocionado</option>
-                    <option>😎 Confiante</option>
-                    <option>😰 Ansioso</option>
-                    <option>🥱 Entediado</option>
-                  </select>
+                  <div class="grupo-icones-opcoes" data-alvo="humor">
+                    <button type="button" class="btn-icone-opcao" data-valor="Feliz"><i class="fas fa-face-smile"></i><span>Feliz</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Neutro"><i class="fas fa-face-meh"></i><span>Neutro</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Triste"><i class="fas fa-face-sad-tear"></i><span>Triste</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Cansado"><i class="fas fa-face-tired"></i><span>Cansado</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Empolgado"><i class="fas fa-face-grin-stars"></i><span>Empolgado</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Relaxado"><i class="fas fa-spa"></i><span>Relaxado</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Reflexivo"><i class="fas fa-brain"></i><span>Reflexivo</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Irritado"><i class="fas fa-face-angry"></i><span>Irritado</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Emocionado"><i class="fas fa-heart"></i><span>Emocionado</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Confiante"><i class="fas fa-face-grin-wide"></i><span>Confiante</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Ansioso"><i class="fas fa-face-flushed"></i><span>Ansioso</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Entediado"><i class="fas fa-face-meh-blank"></i><span>Entediado</span></button>
+                  </div>
+                  <input type="hidden" id="humor">
                 </div>
                 <div class="col-md-4">
                   <label for="clima" class="form-label">Clima</label>
-                  <select id="clima" class="form-select">
-                    <option value="">Selecione...</option>
-                    <option>☀️ Ensolarado</option>
-                    <option>☁️ Nublado</option>
-                    <option>🌧️ Chuvoso</option>
-                    <option>❄️ Frio</option>
-                    <option>🌬️ Ventando</option>
-                    <option>⛅ Parcialmente nublado</option>
-                    <option>🌩️ Tempestade</option>
-                    <option>🌫️ Neblina</option>
-                    <option>🌈 Arco-íris</option>
-                    <option>🔥 Muito calor</option>
-                    <option>🧊 Geada</option>
-                  </select>
+                  <div class="grupo-icones-opcoes" data-alvo="clima">
+                    <button type="button" class="btn-icone-opcao" data-valor="Calor"><i class="fas fa-sun"></i><span>Calor</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Frio"><i class="fas fa-temperature-low"></i><span>Frio</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Chuvoso"><i class="fas fa-cloud-rain"></i><span>Chuvoso</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Muito calor"><i class="fas fa-temperature-high"></i><span>Muito calor</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Muito frio"><i class="fas fa-snowflake"></i><span>Muito frio</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Ameno"><i class="fas fa-cloud-sun"></i><span>Ameno</span></button>
+                    <button type="button" class="btn-icone-opcao" data-valor="Tempestade"><i class="fas fa-bolt"></i><span>Tempestade</span></button>
+                  </div>
+                  <input type="hidden" id="clima">
                 </div>
               </div>
 
@@ -727,178 +729,331 @@
         </div>
       </div>
     </div>
-    <!-- ==================== PÁGINAS PLACEHOLDER ==================== -->
-    <div id="page-estatisticas" class="page">
-      <div class="container py-4">
-        <h1 class="mb-4">Estatísticas</h1>
-    
-        <!-- Cards resumo -->
-        <div class="row g-3 mb-4">
-          <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm">
-              <div class="card-body">
-                <i class="fas fa-book fa-2x text-primary mb-2"></i>
-                <h5 id="stat-total-livros">0</h5>
-                <small>Total de livros</small>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm">
-              <div class="card-body">
-                <i class="fas fa-file-alt fa-2x text-success mb-2"></i>
-                <h5 id="stat-total-paginas">0</h5>
-                <small>Páginas lidas</small>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm">
-              <div class="card-body">
-                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-                <h5 id="stat-total-horas">0</h5>
-                <small>Horas de leitura</small>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm">
-              <div class="card-body">
-                <i class="fas fa-tachometer-alt fa-2x text-danger mb-2"></i>
-                <h5 id="stat-velocidade">0</h5>
-                <small>Páginas/hora</small>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <!-- Insights -->
-        <div class="card mb-4 shadow-sm">
-          <div class="card-header fw-bold"><i class="fas fa-lightbulb text-warning me-2"></i>Percepções</div>
-          <div class="card-body" id="insights-container">
-            <ul class="list-group list-group-flush" id="insights-list"></ul>
-          </div>
-        </div>
-    
-        <!-- Gráficos -->
-        <div class="row g-3">
-          <div class="col-lg-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Livros finalizados por mês</h5>
-                <canvas id="grafico-finalizados-mes" height="200"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Páginas lidas (últimos 30 dias)</h5>
-                <canvas id="grafico-paginas-dia" height="200"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Distribuição por gênero</h5>
-                <canvas id="grafico-generos" height="200"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Tempo de leitura por dia da semana</h5>
-                <canvas id="grafico-dia-semana" height="200"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Evolução da Velocidade (páginas/hora)</h5>
-                <canvas id="grafico-velocidade-mensal" height="200"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Mapa de calor de leitura (últimos meses)</h5>
-                <div id="heatmap-container" class="d-flex flex-wrap gap-1 justify-content-center"></div>
-                <div class="d-flex justify-content-center mt-2">
-                  <small class="me-2">Menos</small>
-                  <div class="d-flex gap-1 align-items-center">
-                    <span style="width:12px;height:12px;background:#ebedf0;border-radius:2px;"></span>
-                    <span style="width:12px;height:12px;background:#ffcccc;border-radius:2px;"></span>
-                    <span style="width:12px;height:12px;background:#ff9999;border-radius:2px;"></span>
-                    <span style="width:12px;height:12px;background:#ff4d4d;border-radius:2px;"></span>
-                    <span style="width:12px;height:12px;background:#cc0000;border-radius:2px;"></span>
-                  </div>
-                  <small class="ms-2">Mais</small>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Top Autores</h5>
-                <ul class="list-group" id="top-autores"></ul>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h5>Top Editoras</h5>
-                <ul class="list-group" id="top-editoras"></ul>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <!-- Calendário de Leitura -->
-        <div class="col-12 mt-4">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0"><i class="fa-solid fa-calendar-days"></i> Calendário de Leitura</h5>
-                <div>
-                  <button id="calendario-mes-anterior" class="btn btn-sm btn-outline-secondary"><i class="fas fa-chevron-left"></i></button>
-                  <span id="calendario-mes-ano" class="mx-2 fw-bold"></span>
-                  <button id="calendario-mes-proximo" class="btn btn-sm btn-outline-secondary"><i class="fas fa-chevron-right"></i></button>
-                  <button id="btn-compartilhar-calendario" class="btn btn-sm btn-outline-primary ms-2" title="Baixar imagem do calendário"><i class="fas fa-camera"></i></button>
-                </div>
-              </div>
-              <div class="row row-cols-7 text-center fw-bold small mb-2" style="color: var(--text-secondary);">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-              </div>
-              <div id="calendario-grid" class="row row-cols-7 g-1">
-                <!-- Preenchido dinamicamente -->
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <!-- Locais de Leitura (NOVO) -->
-        <div class="col-12 mt-4">
-        <div class="card shadow-sm">
-          <div class="card-header fw-bold d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-map-marker-alt me-2"></i>Mapa de Locais de Leitura</span>
-            <button id="btn-atualizar-mapa" class="btn btn-sm btn-outline-secondary" title="Atualizar mapa">
-              <i class="fas fa-sync-alt"></i>
-            </button>
-          </div>
-          <div class="card-body p-0">
-            <div id="mapa-locais" style="height: 450px;"></div>
-          </div>
-        </div>
-      </div>
-    
+    <!-- ==================== PÁGINA: Estatísticas ==================== -->
+<div id="page-estatisticas" class="page">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <h1 class="mb-0">Estatísticas</h1>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <select id="estatisticas-ano-select" class="form-select form-select-sm w-auto" title="Ver resumo de um ano específico"></select>
+        <button type="button" class="btn btn-outline-primary" id="btn-ver-retrospectiva">
+          <i class="fas fa-star me-1"></i> Retrospectiva do ano
+        </button>
       </div>
     </div>
+   
+    <!-- Cards resumo (4 cards, 2 por linha em médio) -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <i class="fas fa-book fa-2x text-primary mb-2"></i>
+            <h5 id="stat-total-livros">0</h5>
+            <small>Livros finalizados</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <i class="fas fa-file-alt fa-2x text-success mb-2"></i>
+            <h5 id="stat-total-paginas">0</h5>
+            <small>Páginas lidas</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+            <h5 id="stat-total-horas">0</h5>
+            <small>Horas de leitura</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <i class="fas fa-tachometer-alt fa-2x text-danger mb-2"></i>
+            <h5 id="stat-velocidade">0</h5>
+            <small>Páginas/hora</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights gerais -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header fw-bold"><i class="fas fa-lightbulb text-warning me-2"></i>Percepções</div>
+      <div class="card-body" id="insights-container">
+        <ul class="list-group list-group-flush" id="insights-list"></ul>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS PRINCIPAIS (5 gráficos + mapa de calor, 2 por linha) -->
+<div class="row g-3">
+  <!-- Linha 1 -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold"><i class="fas fa-book me-2"></i>Livros finalizados por mês <span id="titulo-ano-finalizados-mes"></span></div>
+      <div class="card-body">
+        <canvas id="grafico-finalizados-mes" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold"><i class="fas fa-file-alt me-2"></i>Páginas lidas (últimos 30 dias)</div>
+      <div class="card-body">
+        <canvas id="grafico-paginas-dia" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha 2 -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold"><i class="fas fa-layer-group me-2"></i>Distribuição por gênero <span id="titulo-ano-generos"></span></div>
+      <div class="card-body">
+        <canvas id="grafico-generos" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold"><i class="fas fa-calendar-week me-2"></i>Tempo de leitura por dia da semana <span id="titulo-ano-dia-semana"></span></div>
+      <div class="card-body">
+        <canvas id="grafico-dia-semana" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha 3 (Evolução da Velocidade + Mapa de Calor) -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold"><i class="fas fa-gauge-high me-2"></i>Evolução da Velocidade (páginas/hora) <span id="titulo-ano-velocidade"></span></div>
+      <div class="card-body">
+        <canvas id="grafico-velocidade-mensal" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+<div class="col-md-6">
+  <div class="card shadow-sm h-100">
+    <div class="card-header fw-bold"><i class="fas fa-fire me-2"></i>Mapa de calor de leitura <span id="titulo-ano-heatmap"></span></div>
+    <div class="card-body">
+      <div id="heatmap-container"></div>
+      <div class="d-flex justify-content-center mt-2">
+        <small class="me-2">Menos</small>
+        <div class="d-flex gap-1 align-items-center">
+          <span style="width:12px;height:12px;background:#EDEAE2;border-radius:2px;"></span>
+          <span style="width:12px;height:12px;background:#C9D2C4;border-radius:2px;"></span>
+          <span style="width:12px;height:12px;background:#9DAE96;border-radius:2px;"></span>
+          <span style="width:12px;height:12px;background:#6E8266;border-radius:2px;"></span>
+          <span style="width:12px;height:12px;background:#46543F;border-radius:2px;"></span>
+        </div>
+        <small class="ms-2">Mais</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Top Autores e Editoras (2 colunas, lado a lado) -->
+    <div class="row g-3 mt-3">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header fw-bold"><i class="fas fa-feather-pointed me-2"></i>Top Autores</div>
+          <div class="card-body">
+            <ul class="list-group" id="top-autores"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header fw-bold"><i class="fas fa-building me-2"></i>Top Editoras</div>
+          <div class="card-body">
+            <ul class="list-group" id="top-editoras"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendário de Leitura (linha inteira) -->
+    <div class="col-12 mt-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"><i class="fa-solid fa-calendar-days"></i> Calendário de Leitura</h5>
+            <div>
+              <button id="calendario-mes-anterior" class="btn btn-sm btn-outline-secondary"><i class="fas fa-chevron-left"></i></button>
+              <span id="calendario-mes-ano" class="mx-2 fw-bold"></span>
+              <button id="calendario-mes-proximo" class="btn btn-sm btn-outline-secondary"><i class="fas fa-chevron-right"></i></button>
+              <button id="btn-compartilhar-calendario" class="btn btn-sm btn-outline-primary ms-2" title="Baixar imagem do calendário"><i class="fas fa-camera"></i></button>
+            </div>
+          </div>
+          <div class="row row-cols-7 text-center fw-bold small mb-2" style="color: var(--text-secondary);">
+            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+          </div>
+          <div id="calendario-grid" class="row row-cols-7 g-1">
+            <!-- Preenchido dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS AVANÇADOS (com gráficos de velocidade em 3 colunas) -->
+    <div class="col-12 mt-4">
+      <div class="card shadow-sm">
+        <div class="card-header fw-bold">
+          <i class="fas fa-brain me-2"></i>Insights Avançados (Hábitos de Leitura)
+        </div>
+        <div class="card-body">
+          <!-- Mensagens textuais -->
+          <ul class="list-group list-group-flush mb-4" id="insights-avancados-list">
+            <li class="list-group-item text-muted">Carregando insights personalizados...</li>
+          </ul>
+
+          <!-- Abas: antes tudo (4 gráficos + 7 tabelas) ficava empilhado num
+               scroll só; agora cada recorte de dados fica na sua aba -->
+          <ul class="nav nav-tabs mb-3" id="tabs-insights-avancados" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-btn-velocidade" data-bs-toggle="tab" data-bs-target="#tab-velocidade" type="button" role="tab">Velocidade</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-btn-humor-clima" data-bs-toggle="tab" data-bs-target="#tab-humor-clima" type="button" role="tab">Humor &amp; Clima</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-btn-locais-generos" data-bs-toggle="tab" data-bs-target="#tab-locais-generos" type="button" role="tab">Locais &amp; Gêneros</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-btn-anotacoes" data-bs-toggle="tab" data-bs-target="#tab-anotacoes" type="button" role="tab">Anotações</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="conteudo-insights-avancados">
+            <!-- Aba: Velocidade -->
+            <div class="tab-pane fade show active" id="tab-velocidade" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="small text-muted">Velocidade por Gênero</h6>
+                  <canvas id="grafico-velocidade-genero" height="150"></canvas>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted">Velocidade por Período</h6>
+                  <canvas id="grafico-velocidade-periodo" height="150"></canvas>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted">Velocidade por Humor</h6>
+                  <canvas id="grafico-velocidade-humor" height="150"></canvas>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted">Velocidade por Duração</h6>
+                  <canvas id="grafico-velocidade-duracao" height="150"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Humor & Clima -->
+            <div class="tab-pane fade" id="tab-humor-clima" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-cloud-sun me-2"></i> Distribuição por Clima</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-clima">
+                      <thead><tr><th>Clima</th><th>Sessões</th><th>Duração</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-masks-theater me-2"></i> Nota Média por Humor</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-nota-humor">
+                      <thead><tr><th>Humor</th><th>Nota</th><th>Sessões</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Locais & Gêneros -->
+            <div class="tab-pane fade" id="tab-locais-generos" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-location-dot me-2"></i> Velocidade por Local</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-local-velocidade">
+                      <thead><tr><th>Local</th><th>Velocidade</th><th>Duração</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-ban me-2"></i> Taxa de Abandono por Gênero</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-abandono-genero">
+                      <thead><tr><th>Gênero</th><th>Finaliz.</th><th>Aband.</th><th>%</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-star me-2"></i> Nota Média por Gênero</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-nota-genero">
+                      <thead><tr><th>Gênero</th><th>Nota</th><th>Livros</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-calendar-days me-2"></i> Dias Médios por Gênero</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-dias-genero">
+                      <thead><tr><th>Gênero</th><th>Dias</th><th>Livros</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Anotações -->
+            <div class="tab-pane fade" id="tab-anotacoes" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="small text-muted"><i class="fas fa-pen-fancy me-2"></i> Densidade de Anotações</h6>
+                  <div style="max-height: 260px; overflow-y: auto;">
+                    <table class="table table-sm table-striped mb-0" id="tabela-densidade-anotacoes">
+                      <thead><tr><th>Gênero</th><th>Anot./100 pág</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mapa de Locais de Leitura -->
+    <div class="col-12 mt-4">
+      <div class="card shadow-sm">
+        <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+          <span><i class="fas fa-map-marker-alt me-2"></i>Mapa de Locais de Leitura</span>
+          <button id="btn-atualizar-mapa" class="btn btn-sm btn-outline-secondary" title="Atualizar mapa">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div id="mapa-locais" style="height: 450px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- ==================== FIM DA PÁGINA ESTATÍSTICAS ==================== -->
     <div id="page-metas" class="page">
       <div class="container py-4">
         <h1 class="mb-4">Metas e Conquistas</h1>
@@ -932,6 +1087,11 @@
                 <div class="col-md-4">
                   <label for="meta-diaria" class="form-label">Meta diária (páginas)</label>
                   <input type="number" id="meta-diaria" class="form-control" min="0">
+                </div>
+                <div class="col-md-4">
+                  <label for="meta-sequencia" class="form-label">Meta de sequência (dias seguidos lendo)</label>
+                  <input type="number" id="meta-sequencia" class="form-control" min="0" placeholder="Ex: 30">
+                  <small class="text-muted">Compara com seu recorde de dias seguidos, não com a sequência de hoje.</small>
                 </div>
               </div>
               <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-save me-1"></i>Salvar Metas</button>
@@ -971,6 +1131,18 @@
               </div>
             </div>
           </div>
+          <div class="col-md-12" id="card-prog-sequencia" style="display:none;">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5><i class="fas fa-fire text-orange me-1"></i>Sequência de dias</h5>
+                <div class="progress mb-2">
+                  <div class="progress-bar bg-warning" id="prog-sequencia" role="progressbar" style="width:0%">0%</div>
+                </div>
+                <span id="texto-prog-sequencia">0 de 0 dias (recorde)</span>
+                <br><small class="text-muted" id="texto-sequencia-atual"></small>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Conquistas -->
@@ -991,18 +1163,42 @@
     <div id="page-anotacoes" class="page">
       <div class="container py-4 d-flex flex-column" style="height: 100%;">
         <h1 class="mb-4">Anotações</h1>
-    
-        <!-- Área de pesquisa (desktop: topo; mobile: fixo no rodapé) -->
-        <div class="search-wrapper mb-3">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-search"></i></span>
-            <input type="text" id="anotacoes-search" class="form-control" placeholder="Pesquisar por palavra-chave...">
+
+        <ul class="nav nav-tabs mb-3" id="anotacoesTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-anotacoes" data-bs-toggle="tab" data-bs-target="#painel-anotacoes" type="button" role="tab">Anotações</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-grifos" data-bs-toggle="tab" data-bs-target="#painel-grifos" type="button" role="tab"><i class="fas fa-highlighter me-1"></i>Grifos</button>
+          </li>
+        </ul>
+
+        <div class="tab-content flex-grow-1" style="min-height: 0;">
+          <div class="tab-pane fade show active h-100" id="painel-anotacoes" role="tabpanel">
+            <div class="d-flex flex-column h-100">
+              <!-- Área de pesquisa (desktop: topo; mobile: fixo no rodapé) -->
+              <div class="search-wrapper mb-3">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  <input type="text" id="anotacoes-search" class="form-control" placeholder="Pesquisar por palavra-chave...">
+                </div>
+              </div>
+
+              <!-- Lista de anotações -->
+              <div id="lista-anotacoes" class="flex-grow-1 overflow-auto">
+                <!-- Preenchido dinamicamente -->
+              </div>
+            </div>
           </div>
-        </div>
-    
-        <!-- Lista de anotações -->
-        <div id="lista-anotacoes" class="flex-grow-1 overflow-auto">
-          <!-- Preenchido dinamicamente -->
+
+          <div class="tab-pane fade h-100" id="painel-grifos" role="tabpanel">
+            <div class="d-flex flex-column h-100">
+              <p class="text-muted small mb-2">Trechos grifados no leitor (EPUB e PDF), agrupados por livro.</p>
+              <div id="lista-grifos" class="flex-grow-1 overflow-auto">
+                <!-- Preenchido dinamicamente -->
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1531,7 +1727,7 @@
                   <p id="citacao-autor" contenteditable="true" style="opacity: 0.7; font-size: 0.9rem; outline: none;"></p>
                 </div>
                 <div id="citacao-logo" style="margin-top: 2rem; text-align: center; z-index: 2; position: relative;">
-                  <img src="img/icons/logo.png" alt="Locateca" style="width: 40px; height: auto; opacity: 0.9;">
+                  <img src="img/icons/logo.png" alt="Calixteca" style="width: 40px; height: auto; opacity: 0.9;">
                 </div>
               </div>
             </div>
@@ -1594,21 +1790,46 @@
     </div>
   </div>
 
+  <!-- Modal da Retrospectiva do Ano -->
+  <div class="modal fade" id="modal-retrospectiva" tabindex="-1" aria-labelledby="modalRetrospectivaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalRetrospectivaLabel"><i class="fas fa-star me-2"></i>Retrospectiva</h5>
+          <select id="retrospectiva-ano-select" class="form-select form-select-sm ms-auto me-2" style="max-width: 110px;"></select>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body" id="retrospectiva-corpo">
+          <!-- Preenchido dinamicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" id="btn-baixar-retrospectiva">
+            <i class="fas fa-download"></i> Baixar imagem
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Dependências -->
   <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/util.js"></script>
+  <script src="js/seletor-icones.js"></script>
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
 
   <!-- Módulos -->
   <script src="js/db.js"></script>
+  <script src="js/fila-offline.js"></script>
   <script src="js/livros.js"></script>
   <script src="js/ocr.js"></script>
   <script src="js/leitura.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/biblioteca.js"></script>
   <script src="js/estatisticas.js"></script>
+  <script src="js/retrospectiva.js"></script>
   <script src="js/calendario.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/mapa.js"></script> 

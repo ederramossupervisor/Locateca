@@ -78,3 +78,36 @@
 .badge-status-finalizado { background-color: #7A8B5E; }  /* oliva — concluído */
 .badge-status-abandonado { background-color: #8B4A3D; }  /* vinho — interrompido */
 .badge-status-relendo { background-color: #B79C6B; }     /* dourado — releitura */
+
+/* Filtro rápido por status — fixo no topo ao rolar (mobile e desktop) */
+.biblioteca-filtros-status {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.1rem;
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: var(--bg-primary);
+  scrollbar-width: none;
+}
+.biblioteca-filtros-status::-webkit-scrollbar {
+  display: none;
+}
+.biblioteca-filtros-status .chip-filtro {
+  flex: 0 0 auto;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.biblioteca-filtros-status .chip-filtro.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}

@@ -1,5 +1,6 @@
 const Biblioteca = (() => {
   let livros = [];
+  let statusFiltro = '';
   const grid = document.getElementById('biblioteca-grid');
   const searchInput = document.getElementById('biblioteca-search');
   const contador = document.getElementById('biblioteca-contador');
@@ -51,17 +52,34 @@ const Biblioteca = (() => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(aplicarFiltros, 150);
     });
+
+    document.querySelectorAll('#biblioteca-filtros-status .chip-filtro').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#biblioteca-filtros-status .chip-filtro').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        statusFiltro = chip.dataset.status || '';
+        aplicarFiltros();
+      });
+    });
+  }
+
+  function textoSeguro(valor) {
+    return String(valor === null || valor === undefined ? '' : valor).toLowerCase();
   }
 
   function aplicarFiltros() {
     let filtrados = [...livros];
 
+    if (statusFiltro) {
+      filtrados = filtrados.filter(l => l.Status === statusFiltro);
+    }
+
     const termo = searchInput.value.toLowerCase();
     if (termo) {
       filtrados = filtrados.filter(l =>
-        (l.Título || '').toLowerCase().includes(termo) ||
-        (l.Autor || '').toLowerCase().includes(termo) ||
-        (l.Tags || '').toLowerCase().includes(termo)
+        textoSeguro(l.Título).includes(termo) ||
+        textoSeguro(l.Autor).includes(termo) ||
+        textoSeguro(l.Tags).includes(termo)
       );
     }
 
@@ -126,8 +144,8 @@ const Biblioteca = (() => {
         <div class="d-flex align-items-start p-3">
           <!-- Informações à esquerda -->
           <div class="flex-grow-1 me-3">
-            <div class="titulo fw-bold mb-1">${livro.Título || 'Sem título'}</div>
-            <div class="autor text-muted small mb-2">${livro.Autor || 'Desconhecido'}</div>
+            <div class="titulo fw-bold mb-1">${Util.escapeHTML(livro.Título) || 'Sem título'}</div>
+            <div class="autor text-muted small mb-2">${Util.escapeHTML(livro.Autor) || 'Desconhecido'}</div>
             <span class="badge ${getStatusBadgeClass(livro.Status)} me-1">${livro.Status}</span>
             <div class="mt-2">${renderizarEstrelas(livro.Nota, livro.ID, true)}</div>
           </div>
@@ -182,24 +200,24 @@ const Biblioteca = (() => {
           ${livro.URLCapa ? `<img src="${livro.URLCapa}" alt="Capa" loading="lazy" class="capa-detalhe img-fluid shadow">` : '<i class="fas fa-book fa-5x text-muted"></i>'}
         </div>
         <div class="col-md-8">
-          <h4>${livro.Título}</h4>
-          <p class="text-muted">${livro.Autor || 'Autor desconhecido'}</p>
+          <h4>${Util.escapeHTML(livro.Título)}</h4>
+          <p class="text-muted">${Util.escapeHTML(livro.Autor) || 'Autor desconhecido'}</p>
           <div class="mb-2">${renderizarEstrelas(livro.Nota, livro.ID, true)}</div>
           <table class="table table-sm">
-            <tr><td><strong>Status</strong></td><td><span class="badge ${getStatusBadgeClass(livro.Status)}">${livro.Status}</span></td></tr>
-            <tr><td><strong>Editora</strong></td><td>${livro.Editora || '-'}</td></tr>
+            <tr><td><strong>Status</strong></td><td><span class="badge ${getStatusBadgeClass(livro.Status)}">${Util.escapeHTML(livro.Status)}</span></td></tr>
+            <tr><td><strong>Editora</strong></td><td>${Util.escapeHTML(livro.Editora) || '-'}</td></tr>
             <tr><td><strong>Ano</strong></td><td>${livro.Ano || '-'}</td></tr>
             <tr><td><strong>Páginas</strong></td><td>${livro.NúmeroPáginas || '-'}</td></tr>
             <tr><td><strong>Páginas lidas</strong></td><td>${livro.PáginasLidas || 0} (${progresso}%)</td></tr>
-            <tr><td><strong>Formato</strong></td><td>${livro.Formato || '-'}</td></tr>
+            <tr><td><strong>Formato</strong></td><td>${Util.escapeHTML(livro.Formato) || '-'}</td></tr>
             <tr><td><strong>Início</strong></td><td>${formatarData(livro.DataInício)}</td></tr>
             <tr><td><strong>Término</strong></td><td>${formatarData(livro.DataTérmino)}</td></tr>
-            <tr><td><strong>Gênero</strong></td><td>${livro.Gênero || '-'}</td></tr>
-            <tr><td><strong>Tags</strong></td><td>${livro.Tags || '-'}</td></tr>
-            <tr><td><strong>ISBN</strong></td><td>${livro.ISBN || '-'}</td></tr>
+            <tr><td><strong>Gênero</strong></td><td>${Util.escapeHTML(livro.Gênero) || '-'}</td></tr>
+            <tr><td><strong>Tags</strong></td><td>${Util.escapeHTML(livro.Tags) || '-'}</td></tr>
+            <tr><td><strong>ISBN</strong></td><td>${Util.escapeHTML(livro.ISBN) || '-'}</td></tr>
             <tr><td><strong>Cadastro</strong></td><td>${Util.formatDate(livro.DataCadastro)}</td></tr>
           </table>
-          ${livro.Observacoes ? `<p><strong>Observações:</strong> ${livro.Observacoes}</p>` : ''}
+          ${livro.Observacoes ? `<p><strong>Observações:</strong> ${Util.escapeHTML(livro.Observacoes)}</p>` : ''}
           <div class="mt-3 d-flex gap-2">
             <button class="btn btn-outline-primary btn-editar-livro" data-id="${livro.ID}">Editar</button>
             <button class="btn btn-outline-danger btn-excluir-livro" data-id="${livro.ID}">Excluir</button>

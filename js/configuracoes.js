@@ -25,6 +25,16 @@ const Configuracoes = (() => {
           document.getElementById('coord-local').value = '';
           document.getElementById('coord-valor').value = '';
           carregarCoordenadas();
+          // Avisa quem estiver com o cache de Configuracoes em mãos (ex.: o
+          // Mapa de Locais) que uma coordenada nova foi salva, pra não ficar
+          // preso ao cache antigo até expirar sozinho.
+          try {
+            const configsAtuais = await API.enviar({ acao: 'getConfigs' });
+            if (configsAtuais && !configsAtuais.erro) {
+              await DB.salvarConfigsCache(configsAtuais);
+            }
+          } catch (e) { /* cache é só uma otimização — sem problema se falhar */ }
+          window.dispatchEvent(new CustomEvent('calixteca:configs-atualizadas'));
         }
       } catch (e) {
         Util.toast('Erro ao salvar.', 'danger');
@@ -123,6 +133,10 @@ const Configuracoes = (() => {
     document.getElementById('btn-backup').addEventListener('click', async () => {
       try {
         const backup = await API.enviar({ acao: 'exportBackup' });
+        // Grifos, posição de leitura e configuração do leitor vivem só no
+        // localStorage (não na planilha) — sem isso, restaurar um backup em
+        // outro aparelho "esquecia" tudo o que foi grifado no leitor.
+        backup._localStorage = coletarDadosLocaisParaBackup();
         const jsonStr = JSON.stringify(backup, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -160,6 +174,9 @@ const Configuracoes = (() => {
           btnRestore.disabled = true;
           btnRestore.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Restaurando...';
           await API.enviar({ acao: 'importBackup', backup: backupData });
+          if (backupData._localStorage) {
+            restaurarDadosLocaisDoBackup(backupData._localStorage);
+          }
           Util.toast('Dados restaurados com sucesso! Recarregue a página.', 'success');
           setTimeout(() => location.reload(), 2000);
         } catch (erro) {
@@ -170,6 +187,41 @@ const Configuracoes = (() => {
       };
       reader.readAsText(file);
     });
+  }
+
+  // Reúne tudo que o leitor guarda só no localStorage (grifos por livro,
+  // posição de leitura por livro, e a configuração de aparência do leitor)
+  // pra entrar junto no arquivo de backup.
+  function coletarDadosLocaisParaBackup() {
+    const dados = { highlights: {}, posicoes: {}, leitorConfig: null };
+    for (let i = 0; i < localStorage.length; i++) {
+      const chave = localStorage.key(i);
+      if (!chave) continue;
+      if (chave.startsWith('calixteca_highlights_')) {
+        try { dados.highlights[chave] = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
+      } else if (chave.startsWith('calixteca_pos_')) {
+        try { dados.posicoes[chave] = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
+      } else if (chave === 'calixteca_leitor_config') {
+        try { dados.leitorConfig = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
+      }
+    }
+    return dados;
+  }
+
+  function restaurarDadosLocaisDoBackup(dadosLocais) {
+    try {
+      Object.entries(dadosLocais.highlights || {}).forEach(([chave, valor]) => {
+        localStorage.setItem(chave, JSON.stringify(valor));
+      });
+      Object.entries(dadosLocais.posicoes || {}).forEach(([chave, valor]) => {
+        localStorage.setItem(chave, JSON.stringify(valor));
+      });
+      if (dadosLocais.leitorConfig) {
+        localStorage.setItem('calixteca_leitor_config', JSON.stringify(dadosLocais.leitorConfig));
+      }
+    } catch (e) {
+      console.warn('Falha ao restaurar grifos/posições/config do leitor:', e);
+    }
   }
 
   async function carregarCoordenadas() {
@@ -183,7 +235,7 @@ const Configuracoes = (() => {
           const local = chave.replace('local_coord_', '').replace(/_/g, ' ');
           const li = document.createElement('li');
           li.className = 'd-flex justify-content-between align-items-center py-1';
-          li.innerHTML = `<span><i class="fas fa-map-pin me-2 text-danger"></i>${local}: ${valor}</span>
+          li.innerHTML = `<span><i class="fas fa-map-pin me-2 text-danger"></i>${Util.escapeHTML(local)}: ${Util.escapeHTML(valor)}</span>
             <button class="btn btn-sm btn-outline-danger btn-remover-coord" data-chave="${chave}"><i class="fas fa-trash"></i></button>`;
           lista.appendChild(li);
         }

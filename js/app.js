@@ -1,16 +1,28 @@
 // Controlador principal da aplicação
 document.addEventListener('DOMContentLoaded', () => {
   const splash = document.getElementById('splash-screen');
+  const inicioSplash = Date.now();
 
-  // Só adiciona a classe que inicia a transição de saída após 5 segundos
-  setTimeout(() => {
-    document.body.classList.add('app-loaded');
-  }, 4000);
+  // Tempo mínimo pra splash não "piscar" em conexões rápidas, e máximo de
+  // segurança pra não deixar o usuário preso na splash se a rede estiver
+  // muito lenta (o carregamento do dashboard costuma terminar bem antes disso).
+  const TEMPO_MINIMO_SPLASH = 800;
+  const TEMPO_MAXIMO_SPLASH = 5000;
+  let splashEscondida = false;
 
-  // Remove o elemento do DOM depois que a transição terminar (5s + 0.5s)
-  setTimeout(() => {
-    if (splash) splash.remove();
-  }, 4500);
+  function esconderSplash() {
+    if (splashEscondida) return;
+    splashEscondida = true;
+    const decorrido = Date.now() - inicioSplash;
+    const espera = Math.max(0, TEMPO_MINIMO_SPLASH - decorrido);
+    setTimeout(() => {
+      document.body.classList.add('app-loaded');
+      setTimeout(() => { if (splash) splash.remove(); }, 500);
+    }, espera);
+  }
+
+  // Rede muito lenta ou travada: esconde mesmo assim depois do tempo máximo.
+  setTimeout(esconderSplash, TEMPO_MAXIMO_SPLASH);
 
   // Inicializa módulos básicos (independente da splash)
   Auth.init();
@@ -23,13 +35,17 @@ document.addEventListener('DOMContentLoaded', () => {
     Lembretes.verificarLembreteLeitura().catch(() => {});
   }
 
-  // Carrega a página inicial ativa (dashboard)
+  // Carrega a página inicial ativa (dashboard) e só então esconde a splash —
+  // assim ela some assim que os dados essenciais já estiverem na tela, em vez
+  // de sempre esperar um tempo fixo (mais rápido em conexões boas).
   const activePage = document.querySelector('.page.active');
+  let carregamentoInicial = Promise.resolve();
   if (activePage && activePage.id === 'page-dashboard') {
     if (typeof Dashboard !== 'undefined' && Dashboard.init) {
-      Dashboard.init();
+      carregamentoInicial = Promise.resolve(Dashboard.init());
     }
   }
+  carregamentoInicial.catch(() => {}).finally(esconderSplash);
 
   // Atalhos de página (ex.: ?page=leitura)
   const urlParams = new URLSearchParams(window.location.search);
@@ -177,6 +193,9 @@ function initTema() {
         body.classList.toggle('dark-mode');
         Util.setPreference('darkMode', body.classList.contains('dark-mode'));
         atualizarTodos();
+        window.dispatchEvent(new CustomEvent('calixteca:tema-alterado', {
+          detail: { escuro: body.classList.contains('dark-mode') }
+        }));
       });
     }
   });

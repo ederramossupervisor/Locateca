@@ -1,7 +1,7 @@
 {
-  "name": "Locateca",
-  "short_name": "Locateca",
-  "description": "Locateca - Seu diário de leitura inteligente",
+  "name": "Calixteca",
+  "short_name": "Calixteca",
+  "description": "Calixteca - Seu diário de leitura inteligente",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",

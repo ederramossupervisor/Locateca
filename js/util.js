@@ -1,9 +1,16 @@
 /**
- * Utilitários gerais – Locateca
+ * Utilitários gerais – Calixteca
  */
 const Util = {
   qs: (sel) => document.querySelector(sel),
   qsa: (sel) => document.querySelectorAll(sel),
+
+  escapeHTML: (str) => {
+    if (str === null || str === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  },
 
   // Toast notification usando Bootstrap
   toast: (mensagem, tipo = 'info') => {

@@ -10,7 +10,80 @@ const Anotacoes = (() => {
     await carregarLivrosCache();
     await carregarTodasAnotacoes();
     configurarPesquisa();
+    carregarGrifos();
+    document.getElementById('tab-grifos')?.addEventListener('shown.bs.tab', carregarGrifos);
     console.log('✅ Módulo Anotações pronto.');
+  }
+
+  // ===== Grifos feitos no leitor (EPUB e PDF) =====
+  // Os grifos ficam salvos no localStorage por livro (chave calixteca_highlights_*
+  // — ver js/leitor.js), não na planilha. Aqui só juntamos tudo pra exibir numa
+  // lista só, agrupada por livro.
+  function carregarGrifos() {
+    const container = document.getElementById('lista-grifos');
+    if (!container) return;
+
+    const grupos = {}; // chave do livro -> { titulo, autor, vinculado, itens: [] }
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const chaveStorage = localStorage.key(i);
+      if (!chaveStorage || !chaveStorage.startsWith('calixteca_highlights_')) continue;
+
+      let itens;
+      try {
+        itens = JSON.parse(localStorage.getItem(chaveStorage) || '[]');
+      } catch (e) { continue; }
+      if (!Array.isArray(itens) || itens.length === 0) continue;
+
+      const chaveLivro = chaveStorage.replace('calixteca_highlights_', '');
+      let titulo = 'Livro não identificado';
+      let autor = '';
+      let vinculado = false;
+
+      if (chaveLivro.startsWith('id_')) {
+        const livroID = chaveLivro.replace('id_', '');
+        const livro = livrosCache.find(l => l.ID === livroID);
+        if (livro) {
+          titulo = livro.Título || titulo;
+          autor = livro.Autor || '';
+          vinculado = true;
+        } else {
+          titulo = 'Livro removido da biblioteca';
+        }
+      } else if (chaveLivro.startsWith('titulo_')) {
+        // Ainda não vinculado à biblioteca — o melhor que temos é o slug do título
+        titulo = chaveLivro.replace('titulo_', '').replace(/-/g, ' ');
+        titulo = titulo.charAt(0).toUpperCase() + titulo.slice(1);
+      }
+
+      grupos[chaveLivro] = { titulo, autor, vinculado, itens };
+    }
+
+    const chavesLivros = Object.keys(grupos);
+    if (chavesLivros.length === 0) {
+      container.innerHTML = '<p class="text-muted text-center py-4">Nenhum grifo ainda. Selecione um trecho no leitor e toque em "Grifar".</p>';
+      return;
+    }
+
+    container.innerHTML = chavesLivros.map(chave => {
+      const grupo = grupos[chave];
+      const itensOrdenados = [...grupo.itens].sort((a, b) => new Date(b.data) - new Date(a.data));
+      return `
+        <div class="card mb-3 shadow-sm">
+          <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+            <span>${Util.escapeHTML(grupo.titulo)}${grupo.autor ? ' — ' + Util.escapeHTML(grupo.autor) : ''}</span>
+            ${!grupo.vinculado ? '<span class="badge bg-secondary">não vinculado</span>' : ''}
+          </div>
+          <ul class="list-group list-group-flush">
+            ${itensOrdenados.map(h => `
+              <li class="list-group-item" style="border-left: 4px solid ${h.cor || '#ffe58a'};">
+                <blockquote class="blockquote mb-1" style="font-size: 0.95rem;">${Util.escapeHTML(h.texto)}</blockquote>
+                <small class="text-muted">${h.tipo === 'pdf' ? `Página ${h.pagina}` : 'EPUB'} · ${Util.formatDate ? Util.formatDate(h.data) : new Date(h.data).toLocaleDateString('pt-BR')}</small>
+              </li>
+            `).join('')}
+          </ul>
+        </div>`;
+    }).join('');
   }
 
   async function carregarLivrosCache() {
@@ -268,7 +341,7 @@ const Anotacoes = (() => {
 
       div.innerHTML = `
         <div class="cabecalho d-flex justify-content-between align-items-center mb-2">
-          <span class="badge bg-secondary">${a.Categoria || 'Geral'}</span>
+          <span class="badge bg-secondary">${Util.escapeHTML(a.Categoria) || 'Geral'}</span>
           <div class="d-flex align-items-center gap-1">
             ${trecho ? `
             <button class="btn btn-sm btn-link p-0 text-secondary compartilhar-anotacao" 
@@ -286,14 +359,14 @@ const Anotacoes = (() => {
         </div>
 
         <div class="titulo-livro mb-2" style="font-size:0.85rem; font-weight:500; color:#333;">
-          ${nomeLivro} – ${nomeAutor}
+          ${Util.escapeHTML(nomeLivro)} – ${Util.escapeHTML(nomeAutor)}
         </div>
 
-        ${a.Capítulo ? `<p class="mb-1"><strong>Capítulo:</strong> ${a.Capítulo}</p>` : ''}
-        ${a.Página ? `<p class="mb-1"><strong>Página:</strong> ${a.Página}</p>` : ''}
-        ${a.Resumo ? `<p class="mb-1"><strong>Resumo:</strong> ${a.Resumo}</p>` : ''}
-        ${a.Trecho ? `<blockquote class="blockquote mb-1">${a.Trecho}</blockquote>` : ''}
-        ${a['Comentário'] ? `<p class="mb-0 fst-italic text-secondary">${a['Comentário']}</p>` : ''}
+        ${a.Capítulo ? `<p class="mb-1"><strong>Capítulo:</strong> ${Util.escapeHTML(a.Capítulo)}</p>` : ''}
+        ${a.Página ? `<p class="mb-1"><strong>Página:</strong> ${Util.escapeHTML(a.Página)}</p>` : ''}
+        ${a.Resumo ? `<p class="mb-1"><strong>Resumo:</strong> ${Util.escapeHTML(a.Resumo)}</p>` : ''}
+        ${a.Trecho ? `<blockquote class="blockquote mb-1">${Util.escapeHTML(a.Trecho)}</blockquote>` : ''}
+        ${a['Comentário'] ? `<p class="mb-0 fst-italic text-secondary">${Util.escapeHTML(a['Comentário'])}</p>` : ''}
       `;
 
       container.appendChild(div);

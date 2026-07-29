@@ -234,9 +234,9 @@ const Livros = (() => {
             ${book.urlCapa ? `<img src="${book.urlCapa}" alt="Capa" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fas fa-book fa-2x text-muted d-flex align-items-center justify-content-center h-100"></i>'}
           </div>
           <div>
-            <strong>${book.titulo}</strong><br>
-            <small>${book.autor || 'Autor desconhecido'} (${book.ano || '?'})</small>
-            <span class="badge bg-secondary ms-2">${book.fonte}</span>
+            <strong>${Util.escapeHTML(book.titulo)}</strong><br>
+            <small>${Util.escapeHTML(book.autor) || 'Autor desconhecido'} (${book.ano || '?'})</small>
+            <span class="badge bg-secondary ms-2">${Util.escapeHTML(book.fonte)}</span>
           </div>`;
         searchList.appendChild(item);
       });
@@ -460,6 +460,7 @@ const Livros = (() => {
     document.body.appendChild(modal);
 
     document.getElementById('scanner-close').addEventListener('click', () => {
+      Quagga.offDetected(aoDetectarCodigo);
       Quagga.stop();
       modal.remove();
     });
@@ -482,15 +483,18 @@ const Livros = (() => {
       Quagga.start();
     });
 
-    Quagga.onDetected((result) => {
-      if (result && result.codeResult && result.codeResult.code) {
-        const isbn = result.codeResult.code;
-        Quagga.stop();
-        modal.remove();
-        searchInput.value = isbn;
-        buscarLivro();
-      }
-    });
+    Quagga.onDetected(aoDetectarCodigo);
+  }
+
+  function aoDetectarCodigo(result) {
+    if (result && result.codeResult && result.codeResult.code) {
+      const isbn = result.codeResult.code;
+      Quagga.offDetected(aoDetectarCodigo);
+      Quagga.stop();
+      document.querySelector('.scanner-modal')?.remove();
+      searchInput.value = isbn;
+      buscarLivro();
+    }
   }
 
   // Inicialização

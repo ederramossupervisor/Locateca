@@ -1,6 +1,6 @@
-// Locateca – Service Worker v14 (shell completo + cache sob demanda para libs pesadas)
-const CACHE_NAME = 'eder-livros-v14';
-const RUNTIME_CACHE_NAME = 'eder-livros-runtime-v14';
+// Calixteca – Service Worker v16 (shell completo + cache sob demanda para libs pesadas + cache de imagens/capas)
+const CACHE_NAME = 'eder-livros-v18';
+const RUNTIME_CACHE_NAME = 'eder-livros-runtime-v18';
 
 // App shell: tudo que o app precisa pra funcionar offline logo de cara.
 // Instalado eagerly (cache.addAll) — por isso fica restrito a recursos
@@ -24,19 +24,23 @@ const ASSETS = [
   './css/desejos.css',
   './css/exportar.css',
   './css/configuracoes.css',
+  './css/retrospectiva.css',
   './css/skeleton.css',
   './css/dark-mode.css',
   './css/splash.css',
   './js/util.js',
+  './js/seletor-icones.js',
   './js/api.js',
   './js/auth.js',
   './js/db.js',
+  './js/fila-offline.js',
   './js/livros.js',
   './js/ocr.js',
   './js/leitura.js',
   './js/dashboard.js',
   './js/biblioteca.js',
   './js/estatisticas.js',
+  './js/retrospectiva.js',
   './js/calendario.js',
   './js/mapa.js',
   './js/metas.js',
@@ -101,7 +105,12 @@ self.addEventListener('fetch', event => {
 
   const isShellAsset = ASSETS.includes(url);
   const isFont = url.endsWith('.woff2') || url.endsWith('.woff') || url.endsWith('.ttf');
-  const isRuntimeAsset = !isShellAsset && RUNTIME_PATTERNS.some(padrao => url.includes(padrao));
+  // Qualquer requisição de imagem (capas de livro vindas do Google Drive, Google
+  // Books, etc.) entra no cache de runtime também — elas não mudam depois de
+  // publicadas, então cache-first evita rebaixar a mesma capa toda vez que a
+  // Biblioteca/Dashboard é aberta.
+  const isImage = request.destination === 'image';
+  const isRuntimeAsset = !isShellAsset && (isImage || RUNTIME_PATTERNS.some(padrao => url.includes(padrao)));
 
   // Qualquer coisa fora do shell/fontes/libs pesadas conhecidas: deixa o
   // navegador buscar normalmente, sem qualquer interferência (ex.: as

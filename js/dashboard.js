@@ -14,8 +14,26 @@ const Dashboard = (() => {
     const dashPage = document.getElementById('page-dashboard');
     if (!dashPage || !dashPage.classList.contains('active')) return;
 
-    mostrarSkeletons();
     console.log('📊 Carregando dashboard...');
+
+    // Mostra o que já temos em cache local na hora (stale-while-revalidate),
+    // sem esperar a rede pra pintar a tela — só cai no skeleton se não
+    // houver nada salvo ainda.
+    let temCacheLocal = false;
+    try {
+      const cached = await DB.obterDashboard();
+      if (cached) {
+        temCacheLocal = true;
+        ocultarSkeletons();
+        preencherCards(cached);
+        if (cached.paginasUltimos7Dias) criarGrafico(cached.paginasUltimos7Dias);
+      } else {
+        mostrarSkeletons();
+      }
+    } catch (e) {
+      mostrarSkeletons();
+    }
+
     try {
       const dados = await API.enviar({ acao: 'dashboard' });
       if (dados && !dados.erro) {
@@ -27,14 +45,8 @@ const Dashboard = (() => {
         throw new Error(dados?.erro || 'Dados inválidos');
       }
     } catch (e) {
-      console.warn('Falha na API, tentando cache offline...');
-      const cached = await DB.obterDashboard();
-      if (cached) {
-        ocultarSkeletons();
-        preencherCards(cached);
-        if (cached.paginasUltimos7Dias) {
-          criarGrafico(cached.paginasUltimos7Dias);
-        }
+      console.warn('Falha na API ao atualizar dashboard.');
+      if (temCacheLocal) {
         Util.toast('Modo offline - dados do último acesso.', 'info');
       } else {
         ocultarSkeletons();

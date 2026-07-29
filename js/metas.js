@@ -26,7 +26,8 @@ const Metas = (() => {
         metaPaginas: Number(document.getElementById('meta-paginas').value) || 0,
         metaMensal: Number(document.getElementById('meta-mensal').value) || 0,
         metaSemanal: Number(document.getElementById('meta-semanal').value) || 0,
-        metaDiaria: Number(document.getElementById('meta-diaria').value) || 0
+        metaDiaria: Number(document.getElementById('meta-diaria').value) || 0,
+        metaSequenciaDias: Number(document.getElementById('meta-sequencia').value) || 0
       };
       try {
         const resp = await API.enviar({ acao: 'saveGoal', meta });
@@ -60,7 +61,10 @@ const Metas = (() => {
           percentualLivros: 0,
           percentualPaginas: 0,
           paginasParaMetaMensal: cached.metaMensal || 0,
-          paginasPorDiaNecessarias: 0
+          paginasPorDiaNecessarias: 0,
+          sequenciaAtual: 0,
+          maiorSequencia: 0,
+          percentualSequencia: 0
         };
         exibirProgresso(cached, progresso);
         Util.toast('Modo offline - metas do último acesso.', 'info');
@@ -75,6 +79,7 @@ const Metas = (() => {
     document.getElementById('meta-mensal').value = meta.metaMensal || 0;
     document.getElementById('meta-semanal').value = meta.metaSemanal || 0;
     document.getElementById('meta-diaria').value = meta.metaDiaria || 0;
+    document.getElementById('meta-sequencia').value = meta.metaSequenciaDias || 0;
 
     const progLivros = document.getElementById('prog-livros');
     progLivros.style.width = prog.percentualLivros + '%';
@@ -92,7 +97,22 @@ const Metas = (() => {
       `Faltam ${prog.paginasParaMetaMensal.toLocaleString('pt-BR')} páginas para bater a meta mensal. ` +
       (prog.paginasPorDiaNecessarias > 0
         ? `Leia ${prog.paginasPorDiaNecessarias} páginas por dia.`
-        : 'Meta mensal já batida! 🎉');
+        : 'Meta mensal já batida!');
+
+    const cardSequencia = document.getElementById('card-prog-sequencia');
+    if (meta.metaSequenciaDias > 0 && prog.maiorSequencia !== undefined) {
+      cardSequencia.style.display = '';
+      const progSeq = document.getElementById('prog-sequencia');
+      const pct = prog.percentualSequencia || 0;
+      progSeq.style.width = pct + '%';
+      progSeq.textContent = pct + '%';
+      document.getElementById('texto-prog-sequencia').textContent =
+        `${prog.maiorSequencia} de ${meta.metaSequenciaDias} dias (recorde)`;
+      document.getElementById('texto-sequencia-atual').textContent =
+        `Sequência atual: ${prog.sequenciaAtual} dia${prog.sequenciaAtual === 1 ? '' : 's'}`;
+    } else {
+      cardSequencia.style.display = 'none';
+    }
   }
 
   async function carregarConquistas() {
@@ -156,7 +176,7 @@ const Metas = (() => {
       }
       const novas = await API.enviar({ acao: 'checkAchievements' });
       if (Array.isArray(novas) && novas.length > 0) {
-        Util.toast(`${novas.length} nova(s) conquista(s)! 🎉`, 'success');
+        Util.toast(`${novas.length} nova(s) conquista(s)!`, 'success');
         carregarConquistas();
       } else {
         Util.toast('Nenhuma conquista nova.', 'info');

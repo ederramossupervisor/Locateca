@@ -120,14 +120,14 @@ const DesejosEmprestimos = (() => {
           div.innerHTML = `
             <div class="d-flex justify-content-between align-items-start">
               <div>
-                <strong>${d.Título}</strong> ${d.Autor ? '- ' + d.Autor : ''}
-                <span class="badge bg-secondary ms-2">${d.Prioridade}</span>
-                ${d.Preço ? `<br><small>Preço: R$ ${String(d.Preço).replace(/^R\$\s?/, '')}</small>` : ''}
-                ${d.Link ? `<br><a href="${d.Link}" target="_blank" class="small">🔗 Ver</a>` : ''}
-                ${d.Observacoes ? `<br><small class="text-muted">${d.Observacoes}</small>` : ''}
+                <strong>${Util.escapeHTML(d.Título)}</strong> ${d.Autor ? '- ' + Util.escapeHTML(d.Autor) : ''}
+                <span class="badge bg-secondary ms-2">${Util.escapeHTML(d.Prioridade)}</span>
+                ${d.Preço ? `<br><small>Preço: R$ ${Util.escapeHTML(String(d.Preço).replace(/^R\$\s?/, ''))}</small>` : ''}
+                ${d.Link ? `<br><a href="${Util.escapeHTML(d.Link)}" target="_blank" rel="noopener" class="small">🔗 Ver</a>` : ''}
+                ${d.Observacoes ? `<br><small class="text-muted">${Util.escapeHTML(d.Observacoes)}</small>` : ''}
               </div>
               <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-success btn-mover-biblioteca" data-id="${d.ID}" data-titulo="${d.Título}" data-autor="${d.Autor || ''}" data-preco="${d.Preço || ''}" data-obs="${d.Observacoes || ''}" data-onde="${d.OndeComprar || ''}"><i class="fas fa-book"></i> Mover</button>
+                <button class="btn btn-outline-success btn-mover-biblioteca" data-id="${d.ID}" data-titulo="${Util.escapeHTML(d.Título)}" data-autor="${Util.escapeHTML(d.Autor || '')}" data-preco="${Util.escapeHTML(d.Preço || '')}" data-obs="${Util.escapeHTML(d.Observacoes || '')}" data-onde="${Util.escapeHTML(d.OndeComprar || '')}"><i class="fas fa-book"></i> Mover</button>
                 <button class="btn btn-outline-danger btn-remover-desejo" data-id="${d.ID}"><i class="fas fa-trash"></i></button>
               </div>
             </div>`;
@@ -178,15 +178,17 @@ const DesejosEmprestimos = (() => {
       if (Array.isArray(resp) && resp.length > 0) {
         resp.forEach(emp => {
           const statusClass = emp.Status === 'Atrasado' ? 'emprestimo-atrasado' : (emp.Status === 'Emprestado' ? 'emprestimo-ativo' : 'emprestimo-devolvido');
+          const livro = livrosCache.find(l => l.ID === emp.LivroID);
+          const tituloLivro = livro ? livro.Título : `Livro ID: ${emp.LivroID}`;
           const div = document.createElement('div');
           div.className = `emprestimo-card ${statusClass}`;
           div.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <strong>Livro ID: ${emp.LivroID}</strong> → ${emp.ParaQuem}
-                <br><small>Empréstimo: ${emp.DataEmpréstimo}</small>
-                ${emp.PrevisãoDevolução ? `<br><small>Previsão: ${emp.PrevisãoDevolução}</small>` : ''}
-                <span class="badge bg-${emp.Status === 'Atrasado' ? 'danger' : emp.Status === 'Emprestado' ? 'warning' : 'success'} ms-2">${emp.Status}</span>
+                <strong>${Util.escapeHTML(tituloLivro)}</strong> → ${Util.escapeHTML(emp.ParaQuem)}
+                <br><small>Empréstimo: ${Util.escapeHTML(emp.DataEmpréstimo)}</small>
+                ${emp.PrevisãoDevolução ? `<br><small>Previsão: ${Util.escapeHTML(emp.PrevisãoDevolução)}</small>` : ''}
+                <span class="badge bg-${emp.Status === 'Atrasado' ? 'danger' : emp.Status === 'Emprestado' ? 'warning' : 'success'} ms-2">${Util.escapeHTML(emp.Status)}</span>
               </div>
               ${emp.Status !== 'Devolvido' ? `<button class="btn btn-sm btn-success btn-devolver" data-id="${emp.ID}">Devolver</button>` : ''}
             </div>`;

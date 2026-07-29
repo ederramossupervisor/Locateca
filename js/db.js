@@ -25,6 +25,37 @@ const DB = (() => {
     leitorEstado: 'chave' // armazena um único objeto com chave='ultimo-livro'
   });
 
+  // Nova versão — cache local das Configuracoes (coordenadas dos locais de
+  // leitura, etc.). Evita perguntar 'getConfigs' pro Apps Script toda vez
+  // que o Mapa de Locais abre, já que essas coordenadas mudam raramente.
+  db.version(3).stores({
+    livros: 'ID',
+    sessoes: 'ID',
+    anotacoes: 'ID',
+    metas: 'Ano',
+    conquistas: 'ID',
+    dashboard: 'chave',
+    estatisticas: 'chave',
+    leitorEstado: 'chave',
+    configsCache: 'chave' // chave='principal'
+  });
+
+  // Nova versão — fila de sessões registradas offline, aguardando envio pro
+  // Apps Script assim que a conexão voltar. '++idLocal' = chave autoincrementada
+  // só local, não confundir com o ID gerado pelo backend.
+  db.version(4).stores({
+    livros: 'ID',
+    sessoes: 'ID',
+    anotacoes: 'ID',
+    metas: 'Ano',
+    conquistas: 'ID',
+    dashboard: 'chave',
+    estatisticas: 'chave',
+    leitorEstado: 'chave',
+    configsCache: 'chave',
+    filaOffline: '++idLocal'
+  });
+
   async function salvarLivros(livros) {
     await db.livros.clear();
     await db.livros.bulkPut(livros);
@@ -91,22 +122,21 @@ const DB = (() => {
 
   // ===== Estado do leitor de EPUB (arquivo + posição) =====
   async function salvarEstadoLeitor(arquivo, nomeArquivo, livroID = null) {
-      // Presumindo que sua store seja 'leitorEstado' e use um ID fixo (ex: 1) para o leitor atual
-      const estadoAtual = await db.leitorEstado.get(1) || {};
-      
+      const estadoAtual = await db.leitorEstado.get('ultimo-livro') || {};
+
       await db.leitorEstado.put({
-          id: 1, // Chave primária fixa para manter apenas um livro em memória de leitura
+          chave: 'ultimo-livro', // Chave primária fixa para manter apenas um livro em memória de leitura
           arquivo: arquivo,
           nomeArquivo: nomeArquivo,
           cfi: estadoAtual.cfi || null,
-          livroID: livroID !== null ? livroID : estadoAtual.livroID // Mantém o ID se já existir
+          livroID: livroID !== null ? livroID : (estadoAtual.livroID || null) // Mantém o ID se já existir
       });
   }
 
   async function vincularLivroAoEstado(livroID) {
-      const estadoAtual = await db.leitorEstado.get(1);
+      const estadoAtual = await db.leitorEstado.get('ultimo-livro');
       if (estadoAtual) {
-          await db.leitorEstado.update(1, { livroID: livroID });
+          await db.leitorEstado.update('ultimo-livro', { livroID: livroID });
       }
   }
 
@@ -120,6 +150,33 @@ const DB = (() => {
 
   async function limparEstadoLeitor() {
     await db.leitorEstado.delete('ultimo-livro');
+  }
+
+  // ===== Cache de Configuracoes (coordenadas do mapa, etc.) =====
+  async function salvarConfigsCache(configs) {
+    await db.configsCache.put({ chave: 'principal', dados: configs, ts: Date.now() });
+  }
+
+  async function obterConfigsCache() {
+    const registro = await db.configsCache.get('principal');
+    return registro ? registro.dados : null;
+  }
+
+  // ===== Fila offline (sessões registradas sem conexão) =====
+  async function adicionarNaFila(item) {
+    return await db.filaOffline.add({ ...item, criadoEm: new Date().toISOString() });
+  }
+
+  async function obterFila() {
+    return await db.filaOffline.toArray();
+  }
+
+  async function removerDaFila(idLocal) {
+    await db.filaOffline.delete(idLocal);
+  }
+
+  async function contarFila() {
+    return await db.filaOffline.count();
   }
 
   return {
@@ -140,6 +197,12 @@ const DB = (() => {
     salvarEstadoLeitor,
     salvarPosicaoLeitor,
     obterEstadoLeitor,
-    limparEstadoLeitor
+    limparEstadoLeitor,
+    salvarConfigsCache,
+    obterConfigsCache,
+    adicionarNaFila,
+    obterFila,
+    removerDaFila,
+    contarFila
   };
 })();
