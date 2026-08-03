@@ -77,7 +77,7 @@ const Leitor = (() => {
     try {
       const salvo = (typeof Util !== 'undefined' && Util.getPreference)
         ? Util.getPreference('leitorConfig', null)
-        : JSON.parse(localStorage.getItem('Locateca_leitor_config') || 'null');
+        : JSON.parse(localStorage.getItem('locateca_leitor_config') || 'null');
       if (salvo) config = { ...CONFIG_PADRAO, ...salvo };
     } catch (e) {
       console.warn('Não foi possível carregar config do leitor:', e);
@@ -89,7 +89,7 @@ const Leitor = (() => {
       if (typeof Util !== 'undefined' && Util.setPreference) {
         Util.setPreference('leitorConfig', config);
       } else {
-        localStorage.setItem('Locateca_leitor_config', JSON.stringify(config));
+        localStorage.setItem('locateca_leitor_config', JSON.stringify(config));
       }
     } catch (e) {
       console.warn('Não foi possível salvar config do leitor:', e);
@@ -345,9 +345,9 @@ const Leitor = (() => {
     els.container.style.position = 'relative';
     els.container.innerHTML = `
       <div id="leitor-conteudo" style="width:100%; height:100%; overflow:hidden;"></div>
-      <div id="zona-clique-esquerda" style="position:absolute; top:0; left:0; width:35%; height:100%; z-index:100; cursor:pointer;"></div>
-      <div id="zona-clique-centro" style="position:absolute; top:0; left:35%; width:30%; height:100%; z-index:100; cursor:pointer;"></div>
-      <div id="zona-clique-direita" style="position:absolute; top:0; right:0; width:35%; height:100%; z-index:100; cursor:pointer;"></div>
+      <div id="zona-clique-esquerda" style="position:absolute; top:0; left:0; width:35%; height:100%; z-index:100; cursor:pointer; pointer-events:none;"></div>
+      <div id="zona-clique-centro" style="position:absolute; top:0; left:35%; width:30%; height:100%; z-index:100; cursor:pointer; pointer-events:none;"></div>
+      <div id="zona-clique-direita" style="position:absolute; top:0; right:0; width:35%; height:100%; z-index:100; cursor:pointer; pointer-events:none;"></div>
       <div id="popup-selecao-leitor" class="popup-selecao-leitor d-none">
         <button type="button" class="btn btn-sm btn-warning" id="btn-grifar-selecao"><i class="fas fa-highlighter"></i> Grifar</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-citar-selecao"><i class="fas fa-quote-right"></i> Citar</button>
@@ -370,22 +370,116 @@ const Leitor = (() => {
 
     const usarZonasDeToque = tipoArquivo !== 'epub' || config.modoRolagem !== 'continuo';
 
+    // As zonas ficam com pointer-events:none (ver prepararEstruturaContainer):
+    // elas só marcam visualmente as áreas de navegação, quem realmente trata
+    // o toque/clique é o listener único em configurarNavegacaoPorToque, que
+    // sabe ignorar o gesto quando o usuário está selecionando texto (grifo).
     [zE, zC, zD].forEach(z => { if (z) z.style.display = usarZonasDeToque ? '' : 'none'; });
 
     if (usarZonasDeToque) {
-      if (zE) {
-        zE.onclick = (e) => { e.preventDefault(); e.stopPropagation(); paginaAnterior(); };
-      }
-      if (zC) {
-        zC.onclick = (e) => { e.preventDefault(); e.stopPropagation(); alternarBarrasLeitor(); };
-      }
-      if (zD) {
-        zD.onclick = (e) => { e.preventDefault(); e.stopPropagation(); proximaPagina(); };
-      }
       configurarGestosSwipe(els.container);
-    } else {
-      [zE, zC, zD].forEach(z => { if (z) z.onclick = null; });
+      configurarNavegacaoPorToque(els.container);
     }
+  }
+
+  // ========== NAVEGAÇÃO POR TOQUE/CLIQUE (CORREÇÃO 6) ==========
+  // Antes, as zonas de clique tinham pointer-events:auto e ficavam por cima
+  // de todo o conteúdo (z-index:100), o que impedia o navegador de detectar
+  // a seleção de texto necessária para grifar — o toque/clique nunca chegava
+  // ao texto, era sempre capturado pela zona. Agora as zonas só definem a
+  // área visual; a decisão de virar página ou alternar as barras é tomada
+  // aqui, num único listener de clique no container, que abre mão da ação
+  // sempre que houver uma seleção de texto ativa (ou o clique for no popup
+  // de Grifar/Citar), deixando a seleção funcionar normalmente.
+  function configurarNavegacaoPorToque(container) {
+    if (!container || container.dataset.tapNavConfigurado) return;
+    container.dataset.tapNavConfigurado = '1';
+
+    container.addEventListener('click', (e) => {
+      // Não interfere com cliques no próprio popup de Grifar/Citar
+      if (e.target.closest && e.target.closest('#popup-selecao-leitor')) return;
+
+      // Não vira página se o usuário estiver selecionando (ou acabou de
+      // selecionar) um trecho de texto para grifar
+      const selecao = window.getSelection ? window.getSelection().toString() : '';
+      if (selecao && selecao.trim().length > 0) return;
+
+      const usarZonasAgora = tipoArquivo !== 'epub' || config.modoRolagem !== 'continuo';
+      if (!usarZonasAgora) return;
+
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const proporcao = rect.width > 0 ? x / rect.width : 0.5;
+
+      if (proporcao < 0.35) paginaAnterior();
+      else if (proporcao > 0.65) proximaPagina();
+      else alternarBarrasLeitor();
+    });
+  }
+
+  // ========== NAVEGAÇÃO POR TOQUE DENTRO DO IFRAME DO EPUB (CORREÇÃO 6b) ==========
+  // O conteúdo do EPUB é renderizado pelo epub.js dentro de um <iframe>. Cliques
+  // e toques feitos dentro desse iframe não se propagam para os listeners do
+  // documento pai (é um "browsing context" separado), então o listener do
+  // container (configurarNavegacaoPorToque) nunca é acionado para eles. Por
+  // isso registramos, via rendition.hooks.content, um listener equivalente
+  // dentro de cada seção renderizada, usando o próprio "contents" do epub.js
+  // (contents.document / contents.window) para checar posição do clique e
+  // se há uma seleção de texto ativa (nesse caso, não vira página — deixa o
+  // usuário grifar).
+  function configurarNavegacaoPorToqueNoEpub() {
+    if (!rendition || !rendition.hooks || !rendition.hooks.content) return;
+    if (rendition.__tapNavHookRegistrado) return;
+    rendition.__tapNavHookRegistrado = true;
+
+    let ultimoToqueEpubTs = 0;
+
+    rendition.hooks.content.register((contents) => {
+      const doc = contents && contents.document;
+      if (!doc || doc.__tapNavConfigurado) return;
+      doc.__tapNavConfigurado = true;
+
+      doc.addEventListener('click', (e) => {
+        const selecao = contents.window && contents.window.getSelection ? contents.window.getSelection().toString() : '';
+        if (selecao && selecao.trim().length > 0) return;
+
+        if (config.modoRolagem === 'continuo') return;
+
+        // Trava simples: ignora um segundo clique/toque disparado logo em
+        // seguida do anterior (ex.: touchend + click sintético do navegador
+        // para o mesmo gesto).
+        const agora = Date.now();
+        if (agora - ultimoToqueEpubTs < 500) return;
+        ultimoToqueEpubTs = agora;
+
+        // IMPORTANTE: a largura tem que ser medida pelo wrapper
+        // "#leitor-conteudo" (a área realmente VISÍVEL, com overflow:hidden),
+        // e não pelo próprio <iframe> do epub.js. O epub.js estica o
+        // <iframe> para caber TODAS as colunas/páginas do capítulo lado a
+        // lado (ex.: 328px de página × 499 páginas = ~163.672px de largura
+        // real do iframe) e é o wrapper que recorta e mostra só uma "fatia"
+        // por vez. Medir pelo iframe fazia o cálculo da proporção do
+        // clique ficar errado em capítulos com mais de uma página,
+        // invertendo o sentido da navegação.
+        const wrapperEl = document.getElementById('leitor-conteudo');
+        const largura = wrapperEl ? wrapperEl.getBoundingClientRect().width : 0;
+        if (!largura) return;
+        const proporcao = e.clientX / largura;
+
+        if (proporcao < 0.35) paginaAnterior();
+        else if (proporcao > 0.65) proximaPagina();
+        else alternarBarrasLeitor();
+      });
+
+      // Mesma lógica do documento principal: fecha o popup de Grifar/Citar
+      // quando a seleção dentro do iframe do EPUB é desfeita.
+      if (doc.defaultView && doc.defaultView.getSelection) {
+        doc.addEventListener('selectionchange', () => {
+          const texto = doc.defaultView.getSelection().toString().trim();
+          if (!texto) esconderPopupSelecao();
+        });
+      }
+    });
   }
 
   // ========== GESTOS DE SWIPE (CORREÇÃO 5) ==========
@@ -654,6 +748,17 @@ const Leitor = (() => {
   }
 
   function configurarEventos() {
+    // Fecha o popup de Grifar/Citar assim que o usuário desfizer a seleção
+    // de texto (ex.: clicou fora, apertou Esc, tocou em outro lugar) — antes
+    // o popup ficava aberto mesmo sem nenhum trecho selecionado.
+    if (!document.__esconderPopupSelecaoConfigurado) {
+      document.__esconderPopupSelecaoConfigurado = true;
+      document.addEventListener('selectionchange', () => {
+        const texto = window.getSelection ? window.getSelection().toString().trim() : '';
+        if (!texto) esconderPopupSelecao();
+      });
+    }
+
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('#btn-abrir-epub, #btn-trocar-epub');
       if (btn) {
@@ -902,8 +1007,15 @@ const Leitor = (() => {
   // Escuta seleção de texto no EPUB e mostra um pequeno popup com
   // "Grifar" (marca o trecho, persistido por CFI) e "Citar" (abre o
   // modal de cartão de citação já existente no app, se disponível).
+  function esconderPopupSelecao() {
+    const popup = document.getElementById('popup-selecao-leitor');
+    if (popup) popup.classList.add('d-none');
+  }
+
   function configurarEventosSelecaoEpub() {
     if (!rendition) return;
+
+    configurarNavegacaoPorToqueNoEpub();
 
     rendition.on('selected', (cfiRange, contents) => {
       const texto = contents.window.getSelection().toString().trim();
@@ -944,7 +1056,7 @@ const Leitor = (() => {
       rendition.annotations.highlight(cfiRange, {}, (e) => {
         // Clique no próprio grifo remove a marcação
         removerGrifo(cfiRange);
-      }, 'hl-Locateca', { fill: cor, 'fill-opacity': '0.4' });
+      }, 'hl-locateca', { fill: cor, 'fill-opacity': '0.4' });
     } catch (e) {
       console.warn('Falha ao aplicar grifo:', e);
       return;
@@ -967,7 +1079,7 @@ const Leitor = (() => {
       if (!rendition) return;
       highlightsAtuais.filter(h => h.tipo !== 'pdf').forEach(h => {
         try {
-          rendition.annotations.highlight(h.cfi, {}, () => removerGrifo(h.cfi), 'hl-Locateca', { fill: h.cor || '#ffe58a', 'fill-opacity': '0.4' });
+          rendition.annotations.highlight(h.cfi, {}, () => removerGrifo(h.cfi), 'hl-locateca', { fill: h.cor || '#ffe58a', 'fill-opacity': '0.4' });
         } catch (e) { /* CFI pode não existir mais nesta seção carregada — ok ignorar */ }
       });
     } else if (tipoArquivo === 'pdf') {
@@ -1068,7 +1180,7 @@ const Leitor = (() => {
       .forEach(h => {
         (h.rects || []).forEach(r => {
           const div = document.createElement('div');
-          div.className = 'hl-Locateca-pdf';
+          div.className = 'hl-locateca-pdf';
           div.style.left = (r.left * viewportScale) + 'px';
           div.style.top = (r.top * viewportScale) + 'px';
           div.style.width = (r.width * viewportScale) + 'px';
@@ -1100,7 +1212,7 @@ const Leitor = (() => {
   // livro aberto" globalmente) para que cada livro tenha sua própria posição.
   function obterPosicaoSalva(chave) {
     try {
-      const bruto = localStorage.getItem(`Locateca_pos_${chave}`);
+      const bruto = localStorage.getItem(`locateca_pos_${chave}`);
       return bruto ? JSON.parse(bruto).cfi : null;
     } catch (e) { return null; }
   }
@@ -1108,7 +1220,7 @@ const Leitor = (() => {
   function salvarPosicaoAtual(cfi) {
     const chave = chaveLivroAtual();
     try {
-      localStorage.setItem(`Locateca_pos_${chave}`, JSON.stringify({ cfi, ts: Date.now() }));
+      localStorage.setItem(`locateca_pos_${chave}`, JSON.stringify({ cfi, ts: Date.now() }));
     } catch (e) { console.warn('Falha ao salvar posição local:', e); }
 
     // Mantém compatibilidade com o fluxo antigo de "retomar último livro"
@@ -1119,7 +1231,7 @@ const Leitor = (() => {
 
   function obterGrifosSalvos(chave) {
     try {
-      const bruto = localStorage.getItem(`Locateca_highlights_${chave}`);
+      const bruto = localStorage.getItem(`locateca_highlights_${chave}`);
       return bruto ? JSON.parse(bruto) : [];
     } catch (e) { return []; }
   }
@@ -1127,7 +1239,7 @@ const Leitor = (() => {
   function salvarGrifosAtuais() {
     const chave = chaveLivroAtual();
     try {
-      localStorage.setItem(`Locateca_highlights_${chave}`, JSON.stringify(highlightsAtuais));
+      localStorage.setItem(`locateca_highlights_${chave}`, JSON.stringify(highlightsAtuais));
     } catch (e) { console.warn('Falha ao salvar grifos:', e); }
   }
 
@@ -1505,7 +1617,7 @@ const Leitor = (() => {
       }
     });
 
-    const navSessao = document.querySelector('[data-page="sessao"]') || document.querySelector('[data-page="sessoes"]');
+    const navSessao = document.querySelector('[data-page="leitura"]');
     navSessao?.click();
 
     if (typeof Util !== 'undefined' && Util.toast) {

@@ -121,8 +121,9 @@ function activatePageGlobal(pageName) {
   } catch (e) { /* ignora */ }
 
   // ÍCONES NOS TÍTULOS DAS PÁGINAS (USANDO FONT AWESOME)
+  // "dashboard" fica de fora: o h1 do Início agora é o título "Locateca"
+  // (estilo marca, com subtítulo), não um rótulo de página como as demais.
   const iconesPaginas = {
-    dashboard: 'fa-chart-pie',
     biblioteca: 'fa-books',
     adicionar: 'fa-plus-circle',
     leitura: 'fa-clock',
@@ -179,6 +180,7 @@ function initTema() {
     btn.innerHTML = isDark
       ? '<i class="fas fa-sun"></i> <span class="ms-1">Modo claro</span>'
       : '<i class="fas fa-moon"></i> <span class="ms-1">Modo escuro</span>';
+    btn.title = isDark ? 'Modo claro' : 'Modo escuro';
   }
 
   function atualizarTodos() {
@@ -193,7 +195,7 @@ function initTema() {
         body.classList.toggle('dark-mode');
         Util.setPreference('darkMode', body.classList.contains('dark-mode'));
         atualizarTodos();
-        window.dispatchEvent(new CustomEvent('Locateca:tema-alterado', {
+        window.dispatchEvent(new CustomEvent('locateca:tema-alterado', {
           detail: { escuro: body.classList.contains('dark-mode') }
         }));
       });

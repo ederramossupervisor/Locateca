@@ -30,7 +30,7 @@ body.app-loaded #splash-screen {
 }
 @media (min-width: 768px) {
   .content-area {
-    margin-left: 250px;
+    margin-left: 68px;
     padding-bottom: 0;
   }
 }
@@ -41,30 +41,16 @@ body.app-loaded #splash-screen {
 .sidebar {
   position: fixed;
   top: 0; left: 0; bottom: 0;
-  width: 250px;
+  width: 68px;
   background-color: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
   z-index: 1000;
   /* Retiramos o overflow daqui para não rolar a logo/rodapé */
 }
 
-/* Faz apenas a lista de links da sidebar rolar se a tela for pequena */
-.sidebar nav {
-  flex: 1;
-  overflow-y: auto;
-  flex-wrap: nowrap;
-}
-
 .sidebar .nav-link {
   color: var(--text-secondary);
-  padding: 10px 15px;
   border-radius: var(--radius);
-  margin-bottom: 2px;
-}
-
-/* Afasta um pouco o último link (Configurações) para não grudar no botão de tema */
-.sidebar nav .nav-link:last-child {
-  margin-bottom: 15px;
 }
 
 .sidebar .nav-link.active,
@@ -72,6 +58,27 @@ body.app-loaded #splash-screen {
   background-color: var(--primary);
   color: #fff;
 }
+
+/* Grade de ícones da sidebar (1 coluna, empilhados) — substitui a lista
+   vertical de texto: cada item é só um ícone com tooltip nativo (title),
+   sem precisar de scroll nem de menu suspenso. */
+.sidebar-icon-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+.sidebar .sidebar-icon {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 /* ========================================= */
 
 

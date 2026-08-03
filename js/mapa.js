@@ -51,9 +51,9 @@ const MapaLeitura = (() => {
 
       aplicarTileConformeTema();
 
-      window.addEventListener('Locateca:tema-alterado', aplicarTileConformeTema);
+      window.addEventListener('locateca:tema-alterado', aplicarTileConformeTema);
       // Coordenada nova salva em Configurações: descarta o cache local e recarrega.
-      window.addEventListener('Locateca:configs-atualizadas', () => carregarLocaisNoMapa(true));
+      window.addEventListener('locateca:configs-atualizadas', () => carregarLocaisNoMapa(true));
     }
 
     // Mostra o que já tiver em cache local imediatamente (stale-while-revalidate);

@@ -16,7 +16,7 @@ const Anotacoes = (() => {
   }
 
   // ===== Grifos feitos no leitor (EPUB e PDF) =====
-  // Os grifos ficam salvos no localStorage por livro (chave Locateca_highlights_*
+  // Os grifos ficam salvos no localStorage por livro (chave locateca_highlights_*
   // — ver js/leitor.js), não na planilha. Aqui só juntamos tudo pra exibir numa
   // lista só, agrupada por livro.
   function carregarGrifos() {
@@ -27,7 +27,7 @@ const Anotacoes = (() => {
 
     for (let i = 0; i < localStorage.length; i++) {
       const chaveStorage = localStorage.key(i);
-      if (!chaveStorage || !chaveStorage.startsWith('Locateca_highlights_')) continue;
+      if (!chaveStorage || !chaveStorage.startsWith('locateca_highlights_')) continue;
 
       let itens;
       try {
@@ -35,7 +35,7 @@ const Anotacoes = (() => {
       } catch (e) { continue; }
       if (!Array.isArray(itens) || itens.length === 0) continue;
 
-      const chaveLivro = chaveStorage.replace('Locateca_highlights_', '');
+      const chaveLivro = chaveStorage.replace('locateca_highlights_', '');
       let titulo = 'Livro não identificado';
       let autor = '';
       let vinculado = false;
