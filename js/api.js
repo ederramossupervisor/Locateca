@@ -1,5 +1,5 @@
 const API = (() => {
-  const BASE_URL = 'https://script.google.com/macros/s/AKfycbxeC5orW_66rJp8nwCSvIFZZBMVwq867BVuhby-i5LWHd3qYgT4ghAgrcArUrji7mdvjA/exec';
+  const BASE_URL = 'https://script.google.com/macros/s/AKfycby4wobYQrLLTWl_v-qXtzDltpbhOUjjXlU_W3nOJtJsk0wv1fLi8yUhcer1wDj_RB-o/exec';
 
   // Token de autorização enviado em toda chamada — precisa ser IDÊNTICO ao
   // valor gravado no Code.gs via PropertiesService (função definirTokenApp).
