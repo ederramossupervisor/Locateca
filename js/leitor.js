@@ -1056,7 +1056,7 @@ const Leitor = (() => {
       rendition.annotations.highlight(cfiRange, {}, (e) => {
         // Clique no próprio grifo remove a marcação
         removerGrifo(cfiRange);
-      }, 'hl-calixteca', { fill: cor, 'fill-opacity': '0.4' });
+      }, 'hl-locateca', { fill: cor, 'fill-opacity': '0.4' });
     } catch (e) {
       console.warn('Falha ao aplicar grifo:', e);
       return;
@@ -1079,7 +1079,7 @@ const Leitor = (() => {
       if (!rendition) return;
       highlightsAtuais.filter(h => h.tipo !== 'pdf').forEach(h => {
         try {
-          rendition.annotations.highlight(h.cfi, {}, () => removerGrifo(h.cfi), 'hl-calixteca', { fill: h.cor || '#ffe58a', 'fill-opacity': '0.4' });
+          rendition.annotations.highlight(h.cfi, {}, () => removerGrifo(h.cfi), 'hl-locateca', { fill: h.cor || '#ffe58a', 'fill-opacity': '0.4' });
         } catch (e) { /* CFI pode não existir mais nesta seção carregada — ok ignorar */ }
       });
     } else if (tipoArquivo === 'pdf') {
@@ -1180,7 +1180,7 @@ const Leitor = (() => {
       .forEach(h => {
         (h.rects || []).forEach(r => {
           const div = document.createElement('div');
-          div.className = 'hl-calixteca-pdf';
+          div.className = 'hl-locateca-pdf';
           div.style.left = (r.left * viewportScale) + 'px';
           div.style.top = (r.top * viewportScale) + 'px';
           div.style.width = (r.width * viewportScale) + 'px';
