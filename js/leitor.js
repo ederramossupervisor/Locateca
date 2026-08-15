@@ -77,7 +77,7 @@ const Leitor = (() => {
     try {
       const salvo = (typeof Util !== 'undefined' && Util.getPreference)
         ? Util.getPreference('leitorConfig', null)
-        : JSON.parse(localStorage.getItem('locateca_leitor_config') || 'null');
+        : JSON.parse(localStorage.getItem('calixteca_leitor_config') || 'null');
       if (salvo) config = { ...CONFIG_PADRAO, ...salvo };
     } catch (e) {
       console.warn('Não foi possível carregar config do leitor:', e);
@@ -89,7 +89,7 @@ const Leitor = (() => {
       if (typeof Util !== 'undefined' && Util.setPreference) {
         Util.setPreference('leitorConfig', config);
       } else {
-        localStorage.setItem('locateca_leitor_config', JSON.stringify(config));
+        localStorage.setItem('calixteca_leitor_config', JSON.stringify(config));
       }
     } catch (e) {
       console.warn('Não foi possível salvar config do leitor:', e);
@@ -1056,7 +1056,7 @@ const Leitor = (() => {
       rendition.annotations.highlight(cfiRange, {}, (e) => {
         // Clique no próprio grifo remove a marcação
         removerGrifo(cfiRange);
-      }, 'hl-locateca', { fill: cor, 'fill-opacity': '0.4' });
+      }, 'hl-calixteca', { fill: cor, 'fill-opacity': '0.4' });
     } catch (e) {
       console.warn('Falha ao aplicar grifo:', e);
       return;
@@ -1079,7 +1079,7 @@ const Leitor = (() => {
       if (!rendition) return;
       highlightsAtuais.filter(h => h.tipo !== 'pdf').forEach(h => {
         try {
-          rendition.annotations.highlight(h.cfi, {}, () => removerGrifo(h.cfi), 'hl-locateca', { fill: h.cor || '#ffe58a', 'fill-opacity': '0.4' });
+          rendition.annotations.highlight(h.cfi, {}, () => removerGrifo(h.cfi), 'hl-calixteca', { fill: h.cor || '#ffe58a', 'fill-opacity': '0.4' });
         } catch (e) { /* CFI pode não existir mais nesta seção carregada — ok ignorar */ }
       });
     } else if (tipoArquivo === 'pdf') {
@@ -1180,7 +1180,7 @@ const Leitor = (() => {
       .forEach(h => {
         (h.rects || []).forEach(r => {
           const div = document.createElement('div');
-          div.className = 'hl-locateca-pdf';
+          div.className = 'hl-calixteca-pdf';
           div.style.left = (r.left * viewportScale) + 'px';
           div.style.top = (r.top * viewportScale) + 'px';
           div.style.width = (r.width * viewportScale) + 'px';
@@ -1212,7 +1212,7 @@ const Leitor = (() => {
   // livro aberto" globalmente) para que cada livro tenha sua própria posição.
   function obterPosicaoSalva(chave) {
     try {
-      const bruto = localStorage.getItem(`locateca_pos_${chave}`);
+      const bruto = localStorage.getItem(`calixteca_pos_${chave}`);
       return bruto ? JSON.parse(bruto).cfi : null;
     } catch (e) { return null; }
   }
@@ -1220,7 +1220,7 @@ const Leitor = (() => {
   function salvarPosicaoAtual(cfi) {
     const chave = chaveLivroAtual();
     try {
-      localStorage.setItem(`locateca_pos_${chave}`, JSON.stringify({ cfi, ts: Date.now() }));
+      localStorage.setItem(`calixteca_pos_${chave}`, JSON.stringify({ cfi, ts: Date.now() }));
     } catch (e) { console.warn('Falha ao salvar posição local:', e); }
 
     // Mantém compatibilidade com o fluxo antigo de "retomar último livro"
@@ -1231,7 +1231,7 @@ const Leitor = (() => {
 
   function obterGrifosSalvos(chave) {
     try {
-      const bruto = localStorage.getItem(`locateca_highlights_${chave}`);
+      const bruto = localStorage.getItem(`calixteca_highlights_${chave}`);
       return bruto ? JSON.parse(bruto) : [];
     } catch (e) { return []; }
   }
@@ -1239,7 +1239,7 @@ const Leitor = (() => {
   function salvarGrifosAtuais() {
     const chave = chaveLivroAtual();
     try {
-      localStorage.setItem(`locateca_highlights_${chave}`, JSON.stringify(highlightsAtuais));
+      localStorage.setItem(`calixteca_highlights_${chave}`, JSON.stringify(highlightsAtuais));
     } catch (e) { console.warn('Falha ao salvar grifos:', e); }
   }
 
@@ -1588,7 +1588,8 @@ const Leitor = (() => {
       horaInicio: horaInicioSessao || horaFimSessao,
       horaFim: horaFimSessao,
       paginaInicial: paginaInicialCronometro,
-      paginaFinal: paginaAtual
+      paginaFinal: paginaAtual,
+      minutosLidos
     });
   }
 
@@ -1602,12 +1603,14 @@ const Leitor = (() => {
     const inPI = document.getElementById('pagina-inicial');
     const inPF = document.getElementById('pagina-final');
     const inL = document.getElementById('local-sessao');
+    const inTempo = document.getElementById('tempo-ativo-minutos');
 
     if (inD) inD.value = dados.data;
     if (inHI) inHI.value = dados.horaInicio;
     if (inHF) inHF.value = dados.horaFim;
     if (inPI) inPI.value = dados.paginaInicial;
     if (inPF) inPF.value = dados.paginaFinal;
+    if (inTempo) inTempo.value = dados.minutosLidos || '';
     if (inL && !inL.value) inL.value = `Leitor ${tipoArquivo ? tipoArquivo.toUpperCase() : ''}`;
 
     [inHI, inHF, inPI, inPF].forEach(el => {
