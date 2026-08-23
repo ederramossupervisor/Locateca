@@ -35,7 +35,7 @@
   transform: translateY(-2px);
 }
 
-/* Ícone de status de sincronização, "elevado" depois do título "Calixteca"
+/* Ícone de status de sincronização, "elevado" depois do título "Locateca"
    (estilo expoente/selo pequeno). Fica só o ícone; o texto aparece como um
    toast temporário que some sozinho quando o status muda de verdade (ver
    js/sync-status.js). */
@@ -78,6 +78,58 @@
 .sidebar-sync-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Últimos livros lidos — grade que preenche exatamente a largura do
+   card (sem scroll, sem sobra de espaço): 5 no mobile, 15 no desktop
+   (ver ULTIMOS_LIDOS_MOBILE / ULTIMOS_LIDOS_DESKTOP em js/dashboard.js).
+   O número de colunas é definido via JS de acordo com a quantidade de
+   livros a mostrar; as capas usam aspect-ratio pra encolher junto com
+   a coluna, então nunca estouram a largura do card. */
+#ultimos-lidos-container {
+  width: 100%;
+}
+.ultimos-lidos-grade {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  align-items: start;
+}
+.ultimos-lidos-item {
+  min-width: 0; /* permite a coluna encolher abaixo do tamanho intrínseco */
+  cursor: pointer;
+  text-align: center;
+}
+.ultimos-lidos-item .ultimos-lidos-capa {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ultimos-lidos-item .ultimos-lidos-capa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ultimos-lidos-item .ultimos-lidos-titulo {
+  display: block;
+  margin-top: 6px;
+  font-size: clamp(0.55rem, 1.6vw, 0.7rem);
+  line-height: 1.15;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.ultimos-lidos-item:active .ultimos-lidos-capa {
+  transform: scale(0.96);
 }
 
 /* Mini-heatmap do Dashboard — uma única fileira de quadradinhos (um por
