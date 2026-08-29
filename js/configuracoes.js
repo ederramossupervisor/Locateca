@@ -197,11 +197,11 @@ const Configuracoes = (() => {
     for (let i = 0; i < localStorage.length; i++) {
       const chave = localStorage.key(i);
       if (!chave) continue;
-      if (chave.startsWith('calixteca_highlights_')) {
+      if (chave.startsWith('locateca_highlights_')) {
         try { dados.highlights[chave] = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
-      } else if (chave.startsWith('calixteca_pos_')) {
+      } else if (chave.startsWith('locateca_pos_')) {
         try { dados.posicoes[chave] = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
-      } else if (chave === 'calixteca_leitor_config') {
+      } else if (chave === 'locateca_leitor_config') {
         try { dados.leitorConfig = JSON.parse(localStorage.getItem(chave)); } catch (e) {}
       }
     }
@@ -217,7 +217,7 @@ const Configuracoes = (() => {
         localStorage.setItem(chave, JSON.stringify(valor));
       });
       if (dadosLocais.leitorConfig) {
-        localStorage.setItem('calixteca_leitor_config', JSON.stringify(dadosLocais.leitorConfig));
+        localStorage.setItem('locateca_leitor_config', JSON.stringify(dadosLocais.leitorConfig));
       }
     } catch (e) {
       console.warn('Falha ao restaurar grifos/posições/config do leitor:', e);

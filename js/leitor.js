@@ -77,7 +77,7 @@ const Leitor = (() => {
     try {
       const salvo = (typeof Util !== 'undefined' && Util.getPreference)
         ? Util.getPreference('leitorConfig', null)
-        : JSON.parse(localStorage.getItem('calixteca_leitor_config') || 'null');
+        : JSON.parse(localStorage.getItem('locateca_leitor_config') || 'null');
       if (salvo) config = { ...CONFIG_PADRAO, ...salvo };
     } catch (e) {
       console.warn('Não foi possível carregar config do leitor:', e);
@@ -89,7 +89,7 @@ const Leitor = (() => {
       if (typeof Util !== 'undefined' && Util.setPreference) {
         Util.setPreference('leitorConfig', config);
       } else {
-        localStorage.setItem('calixteca_leitor_config', JSON.stringify(config));
+        localStorage.setItem('locateca_leitor_config', JSON.stringify(config));
       }
     } catch (e) {
       console.warn('Não foi possível salvar config do leitor:', e);
@@ -1212,7 +1212,7 @@ const Leitor = (() => {
   // livro aberto" globalmente) para que cada livro tenha sua própria posição.
   function obterPosicaoSalva(chave) {
     try {
-      const bruto = localStorage.getItem(`calixteca_pos_${chave}`);
+      const bruto = localStorage.getItem(`locateca_pos_${chave}`);
       return bruto ? JSON.parse(bruto).cfi : null;
     } catch (e) { return null; }
   }
@@ -1220,7 +1220,7 @@ const Leitor = (() => {
   function salvarPosicaoAtual(cfi) {
     const chave = chaveLivroAtual();
     try {
-      localStorage.setItem(`calixteca_pos_${chave}`, JSON.stringify({ cfi, ts: Date.now() }));
+      localStorage.setItem(`locateca_pos_${chave}`, JSON.stringify({ cfi, ts: Date.now() }));
     } catch (e) { console.warn('Falha ao salvar posição local:', e); }
 
     // Mantém compatibilidade com o fluxo antigo de "retomar último livro"
@@ -1231,7 +1231,7 @@ const Leitor = (() => {
 
   function obterGrifosSalvos(chave) {
     try {
-      const bruto = localStorage.getItem(`calixteca_highlights_${chave}`);
+      const bruto = localStorage.getItem(`locateca_highlights_${chave}`);
       return bruto ? JSON.parse(bruto) : [];
     } catch (e) { return []; }
   }
@@ -1239,7 +1239,7 @@ const Leitor = (() => {
   function salvarGrifosAtuais() {
     const chave = chaveLivroAtual();
     try {
-      localStorage.setItem(`calixteca_highlights_${chave}`, JSON.stringify(highlightsAtuais));
+      localStorage.setItem(`locateca_highlights_${chave}`, JSON.stringify(highlightsAtuais));
     } catch (e) { console.warn('Falha ao salvar grifos:', e); }
   }
 
