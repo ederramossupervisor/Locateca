@@ -1,5 +1,5 @@
 const API = (() => {
-  const BASE_URL = 'https://script.google.com/macros/s/AKfycbyobOofkElO1Pp5a89YrQgH67ExA51Bp1rIL5zHlQg9rz3TT6yV4VFgGI-ICSU4A6Mx/exec';
+  const BASE_URL = 'https://script.google.com/macros/s/AKfycbxeC5orW_66rJp8nwCSvIFZZBMVwq867BVuhby-i5LWHd3qYgT4ghAgrcArUrji7mdvjA/exec';
 
   // Token de autorização enviado em toda chamada — precisa ser IDÊNTICO ao
   // valor gravado no Code.gs via PropertiesService (função definirTokenApp).
@@ -9,7 +9,7 @@ const API = (() => {
   // Ações somente-leitura: seguras para reaproveitar respostas recentes em
   // memória. Qualquer ação fora desta lista é tratada como mutação e limpa
   // o cache inteiro após concluir com sucesso.
-  const ACOES_CACHEAVEIS = new Set([
+    const ACOES_CACHEAVEIS = new Set([
     'getConfigs',
     'listAllBooks',
     'listBooks',
@@ -18,7 +18,8 @@ const API = (() => {
     'listQuotes',
     'listWishes',
     'listLoans',
-    'dashboard'
+    'dashboard',
+    'timelineAtividades'
   ]);
 
   const CACHE_TTL_MS = 45000; // 45s
