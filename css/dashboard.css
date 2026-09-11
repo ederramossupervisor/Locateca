@@ -35,7 +35,7 @@
   transform: translateY(-2px);
 }
 
-/* Ícone de status de sincronização, "elevado" depois do título "Calixteca"
+/* Ícone de status de sincronização, "elevado" depois do título "Locateca"
    (estilo expoente/selo pequeno). Fica só o ícone; o texto aparece como um
    toast temporário que some sozinho quando o status muda de verdade (ver
    js/sync-status.js). */
