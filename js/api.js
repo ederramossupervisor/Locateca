@@ -1,10 +1,10 @@
 const API = (() => {
-  const SUPABASE_URL = 'https://gqtcjvurdmqlrsdmsjku.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_mCHRPX5XfGwCCfOxSpHUhQ_3MDjnZG2';
+  const SUPABASE_URL = 'https://dxsshtmvdlhumbrxpkwr.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_fvjms00S_W7on-8-qCUMUg_g5a9gBpu';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // Edge Function usada só pelas 2 ações que precisam rodar no servidor
-  // (evitar CORS): proxyImage e buscarPalavra. Ver supabase/functions/locateca-utils.
+  // (evitar CORS): proxyImage e buscarPalavra. Ver supabase/functions/calixteca-utils.
   const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/locateca-utils`;
 
   const ACOES_CACHEAVEIS = new Set([
