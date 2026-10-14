@@ -57,6 +57,60 @@ const Util = {
     return val ? JSON.parse(val) : def;
   },
 
+  // Diálogo de confirmação (Bootstrap) — retorna Promise<boolean>
+  confirmar: function(mensagem, opcoes = {}) {
+    const {
+      titulo = 'Confirmar',
+      variante = 'primary',
+      confirmarTexto = 'Confirmar',
+      cancelarTexto = 'Cancelar',
+      icone = 'fa-circle-question'
+    } = opcoes;
+
+    return new Promise((resolve) => {
+      const id = 'modal-confirmar-' + Date.now();
+      const html = `
+        <div class="modal fade" id="${id}" tabindex="-1" aria-hidden="true" style="z-index:2000">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title"><i class="fas ${Util.escapeHTML(icone)} text-${variante} me-2"></i>${Util.escapeHTML(titulo)}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+              </div>
+              <div class="modal-body">${Util.escapeHTML(mensagem)}</div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">${Util.escapeHTML(cancelarTexto)}</button>
+                <button type="button" class="btn btn-${variante}" data-confirmar>${Util.escapeHTML(confirmarTexto)}</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      document.body.insertAdjacentHTML('beforeend', html);
+
+      const el = document.getElementById(id);
+      const modal = new bootstrap.Modal(el);
+      let resultado = false;
+
+      el.querySelector('[data-confirmar]').addEventListener('click', () => {
+        resultado = true;
+        modal.hide();
+      });
+      el.addEventListener('shown.bs.modal', () => {
+        // garante que o backdrop fique acima de outros modais abertos
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        if (backdrops.length) backdrops[backdrops.length - 1].style.zIndex = '1999';
+        el.querySelector('[data-confirmar]').focus();
+      });
+      el.addEventListener('hidden.bs.modal', () => {
+        modal.dispose();
+        el.remove();
+        resolve(resultado);
+      });
+
+      modal.show();
+    });
+  },
+
   converterLinkDrive: function(url) {
     if (!url) return '';
     const regex = /\/file\/d\/([^/]+)\//;
