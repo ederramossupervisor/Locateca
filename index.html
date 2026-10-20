@@ -829,6 +829,15 @@
   </div>
   <div class="col-md-6">
     <div class="card shadow-sm">
+      <div class="card-header fw-bold"><i class="fas fa-tags me-2"></i>Distribuição por subgênero <span id="titulo-ano-subgeneros"></span></div>
+      <div class="card-body">
+        <canvas id="grafico-subgeneros" height="200"></canvas>
+        <p id="subgeneros-vazio" class="text-muted small text-center my-4" style="display:none;">Nenhum livro finalizado neste ano tem subgênero preenchido.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card shadow-sm">
       <div class="card-header fw-bold"><i class="fas fa-calendar-week me-2"></i>Tempo de leitura por dia da semana <span id="titulo-ano-dia-semana"></span></div>
       <div class="card-body">
         <canvas id="grafico-dia-semana" height="200"></canvas>

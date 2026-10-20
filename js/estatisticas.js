@@ -164,6 +164,7 @@ const Estatisticas = (() => {
       try { criarGraficoFinalizadosMes(dados.finalizadosPorMes); } catch(e) { console.warn(e); }
       try { criarGraficoPaginasDia(dados.paginasPorDia); } catch(e) { console.warn(e); }
       try { criarGraficoGeneros(dados.generos); } catch(e) { console.warn(e); }
+      try { criarGraficoSubgeneros(dados.subgeneros); } catch(e) { console.warn(e); }
       try { criarGraficoDiaSemana(dados.tempoPorDiaSemana); } catch(e) { console.warn(e); }
       if (dados.velocidadeMensal) {
         try { criarGraficoVelocidadeMensal(dados.velocidadeMensal); } catch(e) { console.warn(e); }
@@ -201,6 +202,7 @@ const Estatisticas = (() => {
       'grafico-finalizados-mes',
       'grafico-paginas-dia',
       'grafico-generos',
+      'grafico-subgeneros',
       'grafico-dia-semana',
       'grafico-velocidade-mensal'
     ];
@@ -223,6 +225,7 @@ const Estatisticas = (() => {
     const ids = [
       'titulo-ano-finalizados-mes',
       'titulo-ano-generos',
+      'titulo-ano-subgeneros',
       'titulo-ano-dia-semana',
       'titulo-ano-velocidade',
       'titulo-ano-top-dias'
@@ -299,6 +302,33 @@ const Estatisticas = (() => {
         datasets: [{
           data: generos.map(g => g.count),
           backgroundColor: gerarPaletaGeneros(generos.length)
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: corTextoGrafico() } } }
+      }
+    });
+  }
+
+  function criarGraficoSubgeneros(subgeneros) {
+    const canvas = document.getElementById('grafico-subgeneros');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (graficos.subgeneros) { graficos.subgeneros.destroy(); graficos.subgeneros = null; }
+    const vazio = document.getElementById('subgeneros-vazio');
+    const temDados = subgeneros && subgeneros.length > 0;
+    canvas.style.display = temDados ? '' : 'none';
+    if (vazio) vazio.style.display = temDados ? 'none' : '';
+    if (!temDados) return;
+    graficos.subgeneros = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: subgeneros.map(s => s.subgenero),
+        datasets: [{
+          data: subgeneros.map(s => s.count),
+          backgroundColor: gerarPaletaGeneros(subgeneros.length)
         }]
       },
       options: {

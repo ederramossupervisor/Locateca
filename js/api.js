@@ -543,9 +543,9 @@ const API = (() => {
     })).filter((s) => s.data && !isNaN(s.data.getTime()));
     const sessoes = todasSessoes.filter((s) => s.data >= inicioAno && s.data <= fimAno);
 
-    const livrosRaw = await todos('livros', 'id,titulo,autor,editora,genero,numero_paginas,status,data_termino');
+    const livrosRaw = await todos('livros', 'id,titulo,autor,editora,genero,subgenero,numero_paginas,status,data_termino');
     const todosLivros = livrosRaw.map((l) => ({
-      ID: l.id, titulo: l.titulo || '', autor: l.autor || '', editora: l.editora || '', genero: l.genero || '',
+      ID: l.id, titulo: l.titulo || '', autor: l.autor || '', editora: l.editora || '', genero: l.genero || '', subgenero: (l.subgenero || '').toString().trim(),
       numPag: Number(l.numero_paginas) || 0, status: l.status || '',
       dataTermino: l.data_termino ? parseDataLocal(l.data_termino) : null
     }));
@@ -570,6 +570,16 @@ const API = (() => {
 
     const generosCont = {};
     livrosAno.forEach((l) => { if (l.genero) generosCont[l.genero] = (generosCont[l.genero] || 0) + 1; });
+
+    // Subgênero é texto livre: agrupa ignorando maiúsculas/minúsculas e espaços
+    // extras ("fantasia" e "Fantasia " contam como o mesmo subgênero).
+    const subgenerosCont = {};
+    livrosAno.forEach((l) => {
+      if (!l.subgenero) return;
+      const chave = l.subgenero.toLowerCase().replace(/\s+/g, ' ');
+      if (!subgenerosCont[chave]) subgenerosCont[chave] = { nome: l.subgenero.replace(/\s+/g, ' '), count: 0 };
+      subgenerosCont[chave].count++;
+    });
 
     const diasDaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     const tempoPorDiaSemana = [0, 0, 0, 0, 0, 0, 0];
@@ -633,6 +643,7 @@ const API = (() => {
       ano, finalizadosPorMes: { labels: labelsMeses, valores: finalizadosPorMes },
       paginasPorDia: { labels: labelsDias, valores: paginasPorDia },
       generos: Object.entries(generosCont).map((i) => ({ genero: i[0], count: i[1] })),
+      subgeneros: Object.values(subgenerosCont).sort((a, b) => b.count - a.count).map((s) => ({ subgenero: s.nome, count: s.count })),
       tempoPorDiaSemana: { labels: diasDaSemana, valores: tempoPorDiaSemana }, velocidadeMedia,
       velocidadeMensal: { labels: labelsMesesVelocidade, valores: velocidadeMensalValores },
       topAutores, topEditoras, topDiasLeitura, heatmap, insights, totalLivros: livrosAno.length,
